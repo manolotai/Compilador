@@ -27,26 +27,10 @@ namespace Compilador.Grafo {
             AristasLock.Add(restriccion, new Arista(nodo, pass));
         }
 
-        //public Nodo<TValor, TAristas> this[TAristas idx] {
-        //    get {
-        //        try { return _AristasLock[idx].Nodo;
-        //        } /*catch (KeyNotFoundException) {
-        //            return _AristasFree.FirstOrDefault(arst => arst.Pass).Nodo;
-        //        }*/ catch {
-        //            return _AristasFree.FirstOrDefault(arst => arst.Pass).Nodo;
-        //        }
-        //    }
-        //}
-
         public Arista? this[TAristas idx] {
             get {
-                try {
-                    return _AristasLock[idx];
-                } /*catch (KeyNotFoundException) {
-                    return _AristasFree.FirstOrDefault(arst => arst.Pass).Nodo;
-                }*/ catch {
-                    return _AristasFree.FirstOrDefault(arst => arst.Value.Pass);
-                }
+                Arista? arista = new Arista();
+                return _AristasLock.TryGetValue(idx, out arista) ? arista : null;
             }
         }
 

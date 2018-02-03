@@ -1,3 +1,11 @@
+commit 505e7938ee282a181c3aabadc550ebe3990d5688
+Author: Angel Ruiz Alcaraz <manolotai7@gmail.com>
+Date:   Sat Feb 3 15:02:35 2018 -0600
+
+    Traspaso del Grafo: MyBackPack to Compilador, Se organizaron las clases en sus correspondientes namespace
+
+
+
 commit 4a6e0f2a3f0efd12669162b42df7bf5840ddc373
 Author: Angel Ruiz Alcaraz <manolotai7@gmail.com>
 Date:   Sat Feb 3 14:45:04 2018 -0600
