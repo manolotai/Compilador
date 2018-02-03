@@ -1,0 +1,14 @@
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\bin\Debug\Compilador.exe.config
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\bin\Debug\Compilador.exe
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\bin\Debug\Compilador.pdb
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.csprojResolveAssemblyReference.cache
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.__FrmMain.resources
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.Properties.Resources.resources
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.csproj.GenerateResource.Cache
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.exe
+c:\users\manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.pdb
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\MyBackPack.dll
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\Jace.dll
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\UnityEngine.dll
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\MyBackPack.pdb
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\UnityEngine.xml
