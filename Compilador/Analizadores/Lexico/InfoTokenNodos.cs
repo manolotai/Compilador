@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Compilador {
+namespace Compilador.Analizadores.Lexico {
     public class InfoTokenNodos {
         private List<int> _Registrados;
         private List<int> _Validados;

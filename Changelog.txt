@@ -1,0 +1,5 @@
+commit 4a6e0f2a3f0efd12669162b42df7bf5840ddc373
+Author: Angel Ruiz Alcaraz <manolotai7@gmail.com>
+Date:   Sat Feb 3 14:45:04 2018 -0600
+
+    Inicio, grafo alojado en referencia MyBackPack
