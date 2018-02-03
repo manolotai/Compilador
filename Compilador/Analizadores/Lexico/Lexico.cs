@@ -192,13 +192,13 @@ namespace Compilador.Analizadores.Lexico {
             char c;
             int key = 0;
             string valor = "";
-            Nodo<int, char>.Arista? arst; 
-            while ((nodo = ( arst = nodo[c = (char)_Texto.Peek()]).Value.Nodo) != null && !_Texto.EndOfStream) {
+            Nodo<int, char>.Arista arst; 
+            while ((nodo = (arst = nodo[c = (char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
                 //valor += Char.IsWhiteSpace((char)_Texto.Read()) ?
                 //IsNodo(nodo, 0, _IDNodos[IDTokens.Comentario][4]) ?
                 //"" : "" + c : "" + c;
                 _Texto.Read();
-                if (arst.Value.Pass)
+                if (arst.Pass)
                     valor += c;
                 key = nodo.Valor;
             }

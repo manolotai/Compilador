@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace Compilador.Grafo {
     public class Nodo<TValor, TAristas> {
         private TValor _Valor;
-        private List<Arista?> _AristasFree;
-        private Dictionary<TAristas, Arista?> _AristasLock;
+        private List<Arista> _AristasFree;
+        private Dictionary<TAristas, Arista> _AristasLock;
 
         public Nodo(TValor valor)
         {
             _Valor = valor;
-            _AristasFree = new List<Arista?>();
-            _AristasLock = new Dictionary<TAristas, Arista?>();
+            _AristasFree = new List<Arista>();
+            _AristasLock = new Dictionary<TAristas, Arista>();
         }
 
         public void AddNodo(Nodo<TValor, TAristas> nodo, bool pass = true)
@@ -27,16 +27,16 @@ namespace Compilador.Grafo {
             AristasLock.Add(restriccion, new Arista(nodo, pass));
         }
 
-        public Arista? this[TAristas idx] {
+        public Arista this[TAristas idx] {
             get {
-                Arista? arista = new Arista();
-                return _AristasLock.TryGetValue(idx, out arista) ? arista : null;
+                Arista arista = _AristasLock.TryGetValue(idx, out arista) ? arista : new Arista(null);
+                return arista;
             }
         }
 
         public TValor Valor { get => _Valor; set => _Valor = value; }
-        public List<Arista?> AristasFree { get => _AristasFree; }
-        public Dictionary<TAristas, Arista?> AristasLock { get => _AristasLock; }
+        public List<Arista> AristasFree { get => _AristasFree; }
+        public Dictionary<TAristas, Arista> AristasLock { get => _AristasLock; }
 
         public struct Arista {
             public bool Pass;
