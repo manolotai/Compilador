@@ -35,11 +35,6 @@ namespace Compilador.Grafo {
             _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], pass);
         }
 
-        //public void EnlazarNodos(TID origen, TID destino, TAristas restriccion)
-        //{
-        //    IndiceNodos[origen].AddNodo(IndiceNodos[destino], restriccion);
-        //}
-
         public void EnlazarNodos(TID origen, TID destino,
             IEnumerable<TAristas> restriccion, bool pass = true)
         {

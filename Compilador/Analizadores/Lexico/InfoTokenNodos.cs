@@ -17,11 +17,7 @@ namespace Compilador.Analizadores.Lexico {
             _Registrados.AddRange(new int[] { 0 }.Concat(nodosID));
         }
 
-        //public bool validar(int nodoID)
-        //{
-
-        //}
         public int this[int idx] { get => _Registrados[idx]; }
-        public List<int> Nodos{ get => _Registrados;}
+        public List<int> Nodos{ get => _Registrados; }
     }
 }
