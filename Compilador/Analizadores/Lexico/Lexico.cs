@@ -183,26 +183,37 @@ namespace Compilador.Analizadores.Lexico {
 
         public Token NextToken()
         {
-            return NextToken(_GrafoTokens.IndiceNodos[0]);
+            char c;
+            int estado = 0;
+            string cadena = "";
+            Nodo<int, char>.Arista arista;
+            var nodo = _GrafoTokens.IndiceNodos[0];
+            while ((nodo = (arista = nodo[(char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
+                c = (char)_Texto.Read();
+                estado = nodo.Valor;
+                if (arista.Pass)
+                    cadena += c;
+            }
+            return new Token((int)_NodoToToken[estado], cadena);
+
+            //return NextToken(_GrafoTokens.IndiceNodos[0]);
         }
         private Token NextToken(Nodo<int, char> nodo)
         {
             //o tambien heredar de Token ***
             //agregar contador filas y columnas
+
             char c;
-            int key = 0;
-            string valor = "";
-            Nodo<int, char>.Arista arst; 
-            while ((nodo = (arst = nodo[c = (char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
-                //valor += Char.IsWhiteSpace((char)_Texto.Read()) ?
-                //IsNodo(nodo, 0, _IDNodos[IDTokens.Comentario][4]) ?
-                //"" : "" + c : "" + c;
-                _Texto.Read();
-                if (arst.Pass)
-                    valor += c;
-                key = nodo.Valor;
+            int estado = 0;
+            string cadena = "";
+            Nodo<int, char>.Arista arista; 
+            while ((nodo = (arista = nodo[(char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
+                c = (char)_Texto.Read();
+                estado = nodo.Valor;
+                if (arista.Pass)
+                    cadena += c;
             }
-            return new Token((int)_NodoToToken[key], valor);
+            return new Token((int)_NodoToToken[estado], cadena);
         }
 
         private bool IsNodo(Nodo<int, char> nodo, params int[] estado) //buscar mejor solucion?

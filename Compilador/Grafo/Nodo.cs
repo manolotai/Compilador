@@ -29,7 +29,8 @@ namespace Compilador.Grafo {
 
         public Arista this[TAristas idx] {
             get {
-                Arista arista = _AristasLock.TryGetValue(idx, out arista) ? arista : new Arista(null);
+                Arista arista = !_AristasLock.TryGetValue(idx, out arista) ?
+                    _AristasFree.FirstOrDefault(arst => arst.Pass) : arista;
                 return arista;
             }
         }
