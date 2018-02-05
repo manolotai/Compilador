@@ -7,10 +7,10 @@ using System.IO;
 using Compilador.Grafo;
 
 namespace Compilador.Analizadores.Lexico {
-    class Lexico {
+    public class Lexico {
 
         public enum IDTokens {
-            Identificador, Numero, OpTermino, OpFactor, OpAsignacion, OpIncremento,
+            Blanco, Identificador, Numero, OpTermino, OpFactor, OpAsignacion, OpIncremento,
             OpLogico, OpComparacion, ParametrosInicio, ParametrosFin, BloqueInicio, BloqueFin,
             Cadena, Caracter, Comentario, FinSentencia
         }
@@ -19,53 +19,38 @@ namespace Compilador.Analizadores.Lexico {
         static private char[] LetrasMayus = Enumerable.Range('A', 25).Select(n => (char)n).ToArray();
         static private char[] Letras = LetrasMayus.Concat(LetrasMinus).ToArray();
         static private char[] LetrasNumeros = Letras.Concat(Numeros).ToArray();
-
-        private IntStream _iDStream;
+        
         private StreamReader _Texto;
-        private Grafo<int, char> _GrafoTokens;
-        private Dictionary<int, IDTokens> _NodoToToken;
-        private Dictionary<IDTokens, InfoTokenNodos> _IDNodos;
+        private Grafo<IDTokens, char> _GrafoTokens;
+        private Dictionary<IDTokens, List<int>> _DictNodos;
         public Lexico(StreamReader texto)
         {
             _Texto = texto;
-            _iDStream = new IntStream(1);
-            _GrafoTokens = new Grafo<int, char>();
-            _IDNodos = new Dictionary<IDTokens, InfoTokenNodos>();
-            _NodoToToken = new Dictionary<int, IDTokens>();
-
-            var listaIDNodos = new List<Tuple<IDTokens, int>>() {
-                Tuple.Create(IDTokens.Identificador, 2),
-                Tuple.Create(IDTokens.Numero, 6),
-                Tuple.Create(IDTokens.OpTermino, 2),
-                Tuple.Create(IDTokens.OpFactor, 2),
-                Tuple.Create(IDTokens.OpLogico, 3),
-                Tuple.Create(IDTokens.OpComparacion, 2),
-                Tuple.Create(IDTokens.OpIncremento, 1),
-                Tuple.Create(IDTokens.OpAsignacion, 1),
-                Tuple.Create(IDTokens.ParametrosInicio, 1),
-                Tuple.Create(IDTokens.ParametrosFin, 1),
-                Tuple.Create(IDTokens.BloqueInicio, 1),
-                Tuple.Create(IDTokens.BloqueFin, 1),
-                Tuple.Create(IDTokens.FinSentencia, 1),
-                Tuple.Create(IDTokens.Comentario, 4),
-                Tuple.Create(IDTokens.Cadena, 2),
-                Tuple.Create(IDTokens.Caracter, 2)
-            };
-
-            listaIDNodos.ForEach(
-                p => _IDNodos.Add(p.Item1, new InfoTokenNodos(_iDStream.Read(p.Item2))));
-            
-            //diccionario nodo - token
-            foreach (var item in _IDNodos) {
-                item.Value.Nodos.ForEach(p => {
-                    if (!_NodoToToken.Keys.Contains(p))
-                        _NodoToToken.Add(p, item.Key);
-                    return;
-                });
-            }
+            _GrafoTokens = new Grafo<IDTokens, char>();
+            _DictNodos = new Dictionary<IDTokens, List<int>>();
 
             StartGrafoTokens();
         }
+
+        private void NewNodo(IDTokens valor, int cantidad)
+        {
+            List<int> listaNodos;
+            bool newKey;
+            listaNodos = (newKey = !_DictNodos.TryGetValue(valor, out listaNodos)) ?
+                new List<int>() { 0 } : listaNodos;
+            for (int i = 0; i < cantidad; i++) {
+                listaNodos.Add(_GrafoTokens.Add(valor));
+            }
+
+            if (newKey)
+                _DictNodos.Add(valor, listaNodos);
+        }
+
+        private void Enlazar(int origen, int destino, bool concatenar = true)
+        {
+            _GrafoTokens.EnlazarNodos(origen, destino, concatenar);
+        }
+
         private void Enlazar(int origen, int destino, params char[] restriccion)
         {
             _GrafoTokens.EnlazarNodos(origen, destino, restriccion);
@@ -80,8 +65,8 @@ namespace Compilador.Analizadores.Lexico {
         {
             //o tambien heredar de Token ***
             //agregar contador filas y columnas
-            char c; int estado = 0; string cadena = "";
-            Nodo<int, char>.Arista arista; var nodo = _GrafoTokens.IndiceNodos[0];
+            char c; IDTokens estado = 0; string cadena = "";
+            Nodo<IDTokens, char>.Arista arista; var nodo = _GrafoTokens.IndiceNodos[0];
 
             while ((nodo = (arista = nodo[(char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
                 c = (char)_Texto.Read();
@@ -89,20 +74,47 @@ namespace Compilador.Analizadores.Lexico {
                 if (arista.Pass)
                     cadena += c;
             }
-            return new Token((int)_NodoToToken[estado], cadena);
+            return new Token(estado, cadena);
         }
 
-        public void StartGrafoTokens()
+        private void StartGrafoTokens()
         {
-            InfoTokenNodos idx;
+            InitGrafo();
+            EnlacesGrafo();
+        }
+
+        private void InitGrafo()
+        {
+            _GrafoTokens.Add(IDTokens.Blanco);
+            NewNodo(IDTokens.Identificador, 1);
+            NewNodo(IDTokens.Numero, 6);
+            NewNodo(IDTokens.OpTermino, 2);
+            NewNodo(IDTokens.OpFactor, 2);
+            NewNodo(IDTokens.OpLogico, 3);
+            NewNodo(IDTokens.OpComparacion, 2);
+            NewNodo(IDTokens.OpIncremento, 1);
+            NewNodo(IDTokens.OpAsignacion, 1);
+            NewNodo(IDTokens.ParametrosInicio, 1);
+            NewNodo(IDTokens.ParametrosFin, 1);
+            NewNodo(IDTokens.BloqueInicio, 1);
+            NewNodo(IDTokens.BloqueFin, 1);
+            NewNodo(IDTokens.FinSentencia, 1);
+            NewNodo(IDTokens.Comentario, 4);
+            NewNodo(IDTokens.Cadena, 2);
+            NewNodo(IDTokens.Caracter, 2);
+        }
+
+        public void EnlacesGrafo()
+        {
+            List<int> idx;
             Enlazar(0, 0, false, (char)9, (char)10, (char)32);
             //Identificador
-            idx = _IDNodos[IDTokens.Identificador];
+            idx = _DictNodos[IDTokens.Identificador];
             Enlazar(idx[0], idx[1], Letras);
             Enlazar(idx[1], idx[1], LetrasNumeros);
 
             //Numero
-            idx = _IDNodos[IDTokens.Numero];
+            idx = _DictNodos[IDTokens.Numero];
             Enlazar(idx[0], idx[1], Numeros);
             Enlazar(idx[1], idx[1], Numeros);
             Enlazar(idx[1], idx[2], '.');
@@ -114,32 +126,32 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(idx[4], idx[6], Numeros);
             Enlazar(idx[5], idx[6], Numeros);
             Enlazar(idx[6], idx[6], Numeros);
-            //Enlazar(_IDNodos[IDTokens.OpTermino][1], idx[1], Numeros);//"+"
-            Enlazar(_IDNodos[IDTokens.OpTermino][2], idx[1], Numeros);//"-"
+            //Enlazar(_DictNodos[IDTokens.OpTermino][1], idx[1], Numeros);//"+"
+            Enlazar(_DictNodos[IDTokens.OpTermino][2], idx[1], Numeros);//"-"
 
             //OpTerminos
-            idx = _IDNodos[IDTokens.OpTermino];
+            idx = _DictNodos[IDTokens.OpTermino];
             Enlazar(idx[0], idx[1], '+');
             Enlazar(idx[0], idx[2], '-');
 
             //OpFactores
-            idx = _IDNodos[IDTokens.OpFactor];
+            idx = _DictNodos[IDTokens.OpFactor];
             Enlazar(idx[0], idx[1], '*');
             Enlazar(idx[0], idx[2], '/');
 
             //OpAsignacion
-            idx = _IDNodos[IDTokens.OpAsignacion];
+            idx = _DictNodos[IDTokens.OpAsignacion];
             Enlazar(idx[0], idx[1], '=');
 
             //OpIncremento
-            idx = _IDNodos[IDTokens.OpIncremento];
-            Enlazar(_IDNodos[IDTokens.OpTermino][1], idx[1], '+', '=');
-            Enlazar(_IDNodos[IDTokens.OpTermino][2], idx[1], '-', '=');
-            Enlazar(_IDNodos[IDTokens.OpFactor][1], idx[1], '=');
-            Enlazar(_IDNodos[IDTokens.OpFactor][2], idx[1], '=');
+            idx = _DictNodos[IDTokens.OpIncremento];
+            Enlazar(_DictNodos[IDTokens.OpTermino][1], idx[1], '+', '=');
+            Enlazar(_DictNodos[IDTokens.OpTermino][2], idx[1], '-', '=');
+            Enlazar(_DictNodos[IDTokens.OpFactor][1], idx[1], '=');
+            Enlazar(_DictNodos[IDTokens.OpFactor][2], idx[1], '=');
 
             //OpLogico
-            idx = _IDNodos[IDTokens.OpLogico];
+            idx = _DictNodos[IDTokens.OpLogico];
             Enlazar(idx[0], idx[1], '&');
             Enlazar(idx[0], idx[2], '|');
             Enlazar(idx[0], idx[3], '!');
@@ -147,53 +159,53 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(idx[2], idx[3], '|');
 
             //OpComparacion
-            idx = _IDNodos[IDTokens.OpComparacion];
+            idx = _DictNodos[IDTokens.OpComparacion];
             Enlazar(idx[0], idx[1], '>', '<');
             Enlazar(idx[1], idx[2], '=');
-            Enlazar(_IDNodos[IDTokens.OpLogico][3], idx[2], '=');
-            Enlazar(_IDNodos[IDTokens.OpAsignacion][1], idx[2], '=');
+            Enlazar(_DictNodos[IDTokens.OpLogico][3], idx[2], '=');
+            Enlazar(_DictNodos[IDTokens.OpAsignacion][1], idx[2], '=');
 
             //Comentario
-            idx = _IDNodos[IDTokens.Comentario];
-            Enlazar(_IDNodos[IDTokens.OpFactor][2], idx[1], '/');
+            idx = _DictNodos[IDTokens.Comentario];
+            Enlazar(_DictNodos[IDTokens.OpFactor][2], idx[1], '/');
             Enlazar(idx[1], idx[1]);
             Enlazar(idx[1], idx[4], false, (char)10);
-            Enlazar(_IDNodos[IDTokens.OpFactor][2], idx[2], '*');
+            Enlazar(_DictNodos[IDTokens.OpFactor][2], idx[2], '*');
             Enlazar(idx[2], idx[2]);
             Enlazar(idx[2], idx[3], '*');
             Enlazar(idx[3], idx[2]);
             Enlazar(idx[3], idx[4], '/');
 
             //Cadena
-            idx = _IDNodos[IDTokens.Cadena];
+            idx = _DictNodos[IDTokens.Cadena];
             Enlazar(idx[0], idx[1], '"');
             Enlazar(idx[1], idx[1]);
             Enlazar(idx[1], idx[2], '"');
 
             //Caracter
-            idx = _IDNodos[IDTokens.Caracter];
+            idx = _DictNodos[IDTokens.Caracter];
             Enlazar(idx[0], idx[1], '\'');
             Enlazar(idx[1], idx[1]);
             Enlazar(idx[1], idx[2], '\'');
 
             //InicioParametros
-            idx = _IDNodos[IDTokens.ParametrosInicio];
+            idx = _DictNodos[IDTokens.ParametrosInicio];
             Enlazar(idx[0], idx[1], '(');
 
             //FinParametros
-            idx = _IDNodos[IDTokens.ParametrosFin];
+            idx = _DictNodos[IDTokens.ParametrosFin];
             Enlazar(idx[0], idx[1], ')');
 
             //InicioBloque
-            idx = _IDNodos[IDTokens.BloqueInicio];
+            idx = _DictNodos[IDTokens.BloqueInicio];
             Enlazar(idx[0], idx[1], '{');
 
             //FinBloque
-            idx = _IDNodos[IDTokens.BloqueFin];
+            idx = _DictNodos[IDTokens.BloqueFin];
             Enlazar(idx[0], idx[1], '}');
 
             //FinSentencia
-            idx = _IDNodos[IDTokens.FinSentencia];
+            idx = _DictNodos[IDTokens.FinSentencia];
             Enlazar(idx[0], idx[1], ';');
 
         }

@@ -6,64 +6,58 @@ using System.Threading.Tasks;
 
 namespace Compilador.Grafo {
     public class Grafo<TID, TAristas> {
-        private Dictionary<TID, Nodo<TID, TAristas>> _IndiceNodos;
-        public Grafo()
+        private int _IdxHead;
+        private Queue<int> _IntLiberados;
+        private Dictionary<int, Nodo<TID, TAristas>> _IndiceNodos;
+        public Grafo(int seed = 0)
         {
-            _IndiceNodos = new Dictionary<TID, Nodo<TID, TAristas>>();
+            _IdxHead = seed;
+            _IntLiberados = new Queue<int>();
+            _IndiceNodos = new Dictionary<int, Nodo<TID, TAristas>>();
         }
 
-        private void Prevent(TID key)
+        public int Add(TID valor)
         {
-            if (!_IndiceNodos.Keys.Contains(key))//Poner en un solo metodo?
-                Add(key);
+            _IndiceNodos.Add(_IntLiberados.Count == 0 ? _IdxHead++ : _IntLiberados.Dequeue(),
+                    new Nodo<TID, TAristas>(valor));
+            return _IdxHead - 1;
         }
 
-        public void Add(TID valor)
+        public void EnlazarNodos(int origen, int destino, bool pass = true)
         {
-            try {
-                _IndiceNodos.Add(valor, new Nodo<TID, TAristas>(valor));
-            } catch (ArgumentException) {
-                return;
-            }
-        }
-
-        public void EnlazarNodos(TID origen, TID destino, bool pass = true)
-        {
-            //Poner metodo add nodo?
-            Prevent(origen);
-            Prevent(destino);
             _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], pass);
         }
 
-        public void EnlazarNodos(TID origen, TID destino,
+        public void EnlazarNodos(int origen, int destino,
             IEnumerable<TAristas> restriccion, bool pass = true)
         {
-            Prevent(origen);
-            Prevent(destino);
             foreach (var item in restriccion) {
                 _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item);
             }
         }
 
-        public void EnlazarNodos(TID origen, TID destino, params TAristas[] restriccion)
+        public void EnlazarNodos(int origen, int destino, params TAristas[] restriccion)
         {
-            Prevent(origen);
-            Prevent(destino);
             foreach (var item in restriccion) {
                 _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item);
             }
         }
 
-        public void EnlazarNodos(TID origen, TID destino, bool pass,
+        public void EnlazarNodos(int origen, int destino, bool pass,
             params TAristas[] restriccion)
         {
-            Prevent(origen);
-            Prevent(destino);
             foreach (var item in restriccion) {
                 _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass);
             }
         }
 
-        public Dictionary<TID, Nodo<TID, TAristas>> IndiceNodos { get => _IndiceNodos; }
+        public Dictionary<int, Nodo<TID, TAristas>> IndiceNodos { get => _IndiceNodos; }
+        public Nodo<TID, TAristas> this[int idx] {
+            get {
+                Nodo<TID, TAristas> nodo = _IndiceNodos.TryGetValue(idx, out nodo) ?
+                    nodo : null;
+                return nodo;
+            }
+        }
     }
 }

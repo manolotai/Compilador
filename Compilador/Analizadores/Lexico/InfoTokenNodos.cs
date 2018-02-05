@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 namespace Compilador.Analizadores.Lexico {
     public class InfoTokenNodos {
         private List<int> _Registrados;
-        private List<int> _Validados;
 
         public InfoTokenNodos(IEnumerable<int> nodosID)
         {
             _Registrados = new List<int>();
-            _Validados = new List<int>();
 
             _Registrados.AddRange(new int[] { 0 }.Concat(nodosID));
         }
