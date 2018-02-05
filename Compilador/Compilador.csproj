@@ -56,12 +56,10 @@
     </Compile>
     <Compile Include="Grafo\Grafo.cs" />
     <Compile Include="Grafo\Nodo.cs" />
-    <Compile Include="Analizadores\Lexico\IntStream.cs" />
     <Compile Include="Analizadores\Lexico\Lexico.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Analizadores\Lexico\Token.cs" />
-    <Compile Include="Analizadores\Lexico\InfoTokenNodos.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

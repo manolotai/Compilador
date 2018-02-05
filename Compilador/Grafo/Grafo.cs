@@ -23,32 +23,31 @@ namespace Compilador.Grafo {
             return _IdxHead - 1;
         }
 
-        public void EnlazarNodos(int origen, int destino, bool pass = true)
-        {
-            _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], pass);
-        }
-
         public void EnlazarNodos(int origen, int destino,
             IEnumerable<TAristas> restriccion, bool pass = true)
         {
             foreach (var item in restriccion) {
-                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item);
+                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass);
             }
         }
 
         public void EnlazarNodos(int origen, int destino, params TAristas[] restriccion)
         {
-            foreach (var item in restriccion) {
-                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item);
-            }
+            if(restriccion.Length == 0)
+                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino]);
+            else
+                foreach (var item in restriccion)
+                    _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item);
         }
 
         public void EnlazarNodos(int origen, int destino, bool pass,
             params TAristas[] restriccion)
         {
-            foreach (var item in restriccion) {
-                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass);
-            }
+            if (restriccion.Length == 0)
+                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], pass);
+            else
+                foreach (var item in restriccion)
+                    _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass);
         }
 
         public Dictionary<int, Nodo<TID, TAristas>> IndiceNodos { get => _IndiceNodos; }
