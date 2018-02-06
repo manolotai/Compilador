@@ -12,21 +12,30 @@ using Compilador.Analizadores.Lexico;
 
 namespace Compilador {
     public partial class __FrmMain : Form {
+        private string PathProyect;
         public __FrmMain()
         {
             InitializeComponent();
-            using ( StreamReader readStrm = new StreamReader(@"C: \Users\Manolo\Desktop\lexico.txt"))
-                __RTxtCsFile.Text = readStrm.ReadToEnd();
+            PathProyect = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            var listFiles = new DirectoryInfo(Directory.GetCurrentDirectory()).GetFiles("Text.cs");
+            if(listFiles.Count() == 0) {
+                using (var writeStrm = new StreamWriter(PathProyect + @"\Text.cs", false, Encoding.ASCII)) {
+                    writeStrm.Write("//Archivo Nuevo " + (char)10);
+                }
+                using (var readStrm = new StreamReader((PathProyect + @"\Text.cs")))
+                    __RTxtCsFile.Text = readStrm.ReadToEnd();
+            } else {
+                using (var readStrm = new StreamReader(PathProyect + @"\Text.cs"))
+                    __RTxtCsFile.Text = readStrm.ReadToEnd();
+            }
+            
         }
 
         private void __BtnCompilar_Click(object sender, EventArgs e)
         {
-            var path0 = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent;
-            string path = Directory.GetCurrentDirectory();
-            Console.WriteLine(path0.FullName);
-            using (StreamWriter writeStrm = new StreamWriter(@"C: \Users\Manolo\Desktop\lexico.txt", false, Encoding.ASCII))
+            using (var writeStrm = new StreamWriter(PathProyect + @"\Text.cs", false, Encoding.ASCII))
                 writeStrm.Write(__RTxtCsFile.Text);
-            using (StreamReader readStrm = new StreamReader(@"C: \Users\Manolo\Desktop\lexico.txt")) {
+            using (var readStrm = new StreamReader((PathProyect + @"\Text.cs"))) {
                 Lexico test = new Lexico(readStrm);
                 Token testToken;
                 while ((testToken = test.NextToken()).Valor != "") {

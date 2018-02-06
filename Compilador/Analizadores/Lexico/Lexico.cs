@@ -28,7 +28,8 @@ namespace Compilador.Analizadores.Lexico {
 
         public Lexico(StreamReader texto)
         {
-            _Fila = _Columna = 0;
+            _Fila = 1;
+            _Columna = 0;
             _Texto = texto;
             _GrafoTokens = new Grafo<IDTokens, char>();
             _DictNodos = new Dictionary<IDTokens, List<int>>();
@@ -39,7 +40,6 @@ namespace Compilador.Analizadores.Lexico {
         public Token NextToken()
         {
             //o tambien heredar de Token ***
-            //agregar contador filas y columnas
             char c; IDTokens estado = 0; string cadena = "";
             Nodo<IDTokens, char>.Arista arista; var nodo = _GrafoTokens.IndiceNodos[0];
 
