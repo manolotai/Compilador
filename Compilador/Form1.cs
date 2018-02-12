@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
 using Compilador.Analizadores.Lexico;
+using Compilador.Analizadores.Sintaxis;
 
 namespace Compilador {
     public partial class __FrmMain : Form {
@@ -17,7 +18,7 @@ namespace Compilador {
         {
             InitializeComponent();
             PathProyect = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-            var listFiles = new DirectoryInfo(Directory.GetCurrentDirectory()).GetFiles("Text.cs");
+            var listFiles = new DirectoryInfo(PathProyect).GetFiles("Text.cs");
             if(listFiles.Count() == 0) {
                 using (var writeStrm = new StreamWriter(PathProyect + @"\Text.cs", false, Encoding.ASCII)) {
                     writeStrm.Write("//Archivo Nuevo " + (char)10);
@@ -36,12 +37,14 @@ namespace Compilador {
             using (var writeStrm = new StreamWriter(PathProyect + @"\Text.cs", false, Encoding.ASCII))
                 writeStrm.Write(__RTxtCsFile.Text);
             using (var readStrm = new StreamReader((PathProyect + @"\Text.cs"))) {
-                Lexico test = new Lexico(readStrm);
-                Token testToken;
-                while ((testToken = test.NextToken()).Valor != "") {
-                    Console.WriteLine(testToken.Valor);
-                    Console.WriteLine((Lexico.IDTokens)testToken.ID);
-                }
+                //Lexico test = new Lexico(readStrm);
+                //while (test.NextToken()) {
+                //    Console.WriteLine(test.Valor);
+                //    Console.WriteLine(test.ID);
+                //}
+                Sintaxis test2 = new Sintaxis(readStrm);
+                Console.WriteLine(test2.Expresion());
+            
             }
         }
     }

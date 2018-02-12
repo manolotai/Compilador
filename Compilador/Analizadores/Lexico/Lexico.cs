@@ -7,7 +7,7 @@ using System.IO;
 using Compilador.Grafo;
 
 namespace Compilador.Analizadores.Lexico {
-    public class Lexico {
+    public class Lexico : Token {
 
         static private char[] Numeros = Enumerable.Range('0', 10).Select(n => (char)n).ToArray();
         static private char[] LetrasMinus = Enumerable.Range('a', 25).Select(n => (char)n).ToArray();
@@ -17,7 +17,7 @@ namespace Compilador.Analizadores.Lexico {
         public enum IDTokens {
             Blanco, Identificador, Numero, OpTermino, OpFactor, OpAsignacion, OpIncremento,
             OpLogico, OpComparacion, ParametrosInicio, ParametrosFin, BloqueInicio, BloqueFin,
-            Cadena, Caracter, Comentario, FinSentencia
+            Cadena, Caracter, Comentario, FinSentencia, Error
         }
 
         private int _Fila;
@@ -37,11 +37,13 @@ namespace Compilador.Analizadores.Lexico {
             StartGrafoTokens();
         }
 
-        public Token NextToken()
+        public bool NextToken()
         {
             //o tambien heredar de Token ***
-            char c; IDTokens estado = 0; string cadena = "";
-            Nodo<IDTokens, char>.Arista arista; var nodo = _GrafoTokens.IndiceNodos[0];
+            char c; _Valor = "";
+            bool isToken = !_Texto.EndOfStream;
+            Nodo<IDTokens, char>.Arista arista;
+            var nodo = _GrafoTokens.IndiceNodos[0];
 
             while ((nodo = (arista = nodo[(char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
                 if ((c = (char)_Texto.Read()) == (char)10) {
@@ -49,11 +51,14 @@ namespace Compilador.Analizadores.Lexico {
                     _Columna = 0;
                 }
                 if (arista.Pass)
-                    cadena += c;
+                    _Valor += c;
                 _Columna++;
-                estado = nodo.Valor;
+                _ID = nodo.Valor;
             }
-            return new Token(estado, cadena);
+            if (_ID == IDTokens.Comentario)
+                NextToken();
+
+            return isToken ? true : false;
         }
 
         private void NewNodo(IDTokens valor, int cantidad)
@@ -95,7 +100,10 @@ namespace Compilador.Analizadores.Lexico {
             NewNodo(IDTokens.Blanco, 0);
             idx = _DictNodos[IDTokens.Blanco];
             Enlazar(idx[0], idx[0], false, (char)9, (char)10, (char)32);
-            
+
+            //ErrorLexico
+            NewNodo(IDTokens.Error, 3);
+
             //Identificador
             NewNodo(IDTokens.Identificador, 1);
             idx = _DictNodos[IDTokens.Identificador];
@@ -109,21 +117,20 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(idx[0], idx[2], '-');
 
             //Numero
-            NewNodo(IDTokens.Numero, 6);
+            NewNodo(IDTokens.Numero, 3);
             idx = _DictNodos[IDTokens.Numero];
             Enlazar(idx[0], idx[1], Numeros);
             Enlazar(idx[1], idx[1], Numeros);
-            Enlazar(idx[1], idx[2], '.');
-            Enlazar(idx[1], idx[4], 'e');
-            Enlazar(idx[2], idx[3], Numeros);
+            Enlazar(idx[1], _DictNodos[IDTokens.Error][1], '.');
+            Enlazar(_DictNodos[IDTokens.Error][1], idx[2], Numeros);
+            Enlazar(idx[2], idx[2], Numeros);
+            Enlazar(idx[2], _DictNodos[IDTokens.Error][2], 'e');
+            Enlazar(_DictNodos[IDTokens.Error][2], _DictNodos[IDTokens.Error][3], '+', '-');
+            Enlazar(_DictNodos[IDTokens.Error][2], idx[3], Numeros);
+            Enlazar(_DictNodos[IDTokens.Error][3], idx[3], Numeros);
             Enlazar(idx[3], idx[3], Numeros);
-            Enlazar(idx[3], idx[4], 'e');
-            Enlazar(idx[4], idx[5], '+', '-');
-            Enlazar(idx[4], idx[6], Numeros);
-            Enlazar(idx[5], idx[6], Numeros);
-            Enlazar(idx[6], idx[6], Numeros);
             //Enlazar(_DictNodos[IDTokens.OpTermino][1], idx[1], Numeros);//"+"
-            Enlazar(_DictNodos[IDTokens.OpTermino][2], idx[1], Numeros);//"-"
+            //Enlazar(_DictNodos[IDTokens.OpTermino][2], idx[1], Numeros);//"-"
 
             //OpFactores
             NewNodo(IDTokens.OpFactor, 2);
