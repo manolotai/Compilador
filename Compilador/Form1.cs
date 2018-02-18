@@ -43,8 +43,10 @@ namespace Compilador {
                 //    Console.WriteLine(test.ID);
                 //}
                 Sintaxis test2 = new Sintaxis(readStrm);
-                Console.WriteLine(test2.Expresion());
-            
+                //Console.WriteLine(test2.Expresion());
+                //test2.NextSentence();
+                Console.WriteLine(typeof(int));
+
             }
         }
     }

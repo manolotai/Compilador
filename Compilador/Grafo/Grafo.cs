@@ -19,9 +19,17 @@ namespace Compilador.Grafo {
         public int Add(TID valor)
         {
             _IndiceNodos.Add(_IntLiberados.Count == 0 ? _IdxHead++ : _IntLiberados.Dequeue(),
-                    new Nodo<TID, TAristas>(valor));
+                new Nodo<TID, TAristas>(valor));
             return _IdxHead - 1;
         }
+
+        //public Tuple<int, int> AddEnlazar(
+        //    Nodo<TID, TAristas> origen, Nodo<TID, TAristas> destino, 
+        //    params TAristas[] restriccion)
+        //{
+        //    _IndiceNodos.Add(_IntLiberados.Count == 0 ? _IdxHead++ : _IntLiberados.Dequeue(),
+        //        new );
+        //}
 
         public void EnlazarNodos(int origen, int destino,
             IEnumerable<TAristas> restriccion, bool pass = true)

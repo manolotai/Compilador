@@ -6,17 +6,46 @@ using System.Threading.Tasks;
 
 namespace Compilador.Analizadores.Sintaxis {
     public class Atributo {
-        enum Accesor{ Publico, Privado, Protegido }
-        enum Tipo { Char, Int, Float, Double }
-        private Tipo _TipoDato;
+        public enum Accesor{ Public, Private, Protected }
+        public enum TypeDato { Unknown, Char, Int, Float, Double }
+
         private string _Nombre;
-        private Accesor _Accesibilidad;
         private double _Valor;
-        int a = 0;
+        private TypeDato _TipoDato;
+        private Accesor _Acceso;
         
-        Atributo()
+
+        public Atributo(string nombre, double valor, string tipoDato, string accesor)
         {
+            _Nombre = nombre;
+            _Valor = valor;
+            if(Enum.IsDefined(typeof(TypeDato), tipoDato)) {
+                _TipoDato = (TypeDato)Enum.Parse(typeof(TypeDato), tipoDato, true);
+            } else {
+                //arrojar exception
+            }
+
+            if (Enum.IsDefined(typeof(Accesor), accesor)) {
+                _Acceso = (Accesor)Enum.Parse(typeof(Accesor), accesor, true);
+            } else {
+                //arrojar exception
+            }
             
         }
+
+        public Atributo(string nombre, double valor, 
+            TypeDato tipoDato, Accesor acceso = Accesor.Private)
+        {
+            _Nombre = nombre;
+            _Valor = valor;
+            _TipoDato = tipoDato;
+            _Acceso = acceso;
+        }
+
+        public string Nombre { get => _Nombre; set => _Nombre = value; }
+        public double Valor { get => _Valor; set => _Valor = value; }
+        public TypeDato TipoDato { get => _TipoDato; set => _TipoDato = value; }
+        public Accesor Acceso { get => _Acceso; set => _Acceso = value; }
+
     }
 }
