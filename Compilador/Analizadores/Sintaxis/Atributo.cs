@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Compilador.Analizadores.Sintaxis {
     public class Atributo {
         public enum Accesor{ Public, Private, Protected }
-        public enum TypeDato { Unknown, Char, Int, Float, Double }
+        public enum TypeDato { Unknown, Void, Char, Int, Float, Double }
 
         private string _Nombre;
         private double _Valor;

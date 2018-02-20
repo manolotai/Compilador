@@ -17,11 +17,12 @@ namespace Compilador.Analizadores.Lexico {
         public enum IDTokens {
             Blanco, Identificador, Numero, OpTermino, OpFactor, OpAsignacion, OpIncremento,
             OpLogico, OpComparacion, ParametrosInicio, ParametrosFin, BloqueInicio, BloqueFin,
-            Cadena, Caracter, Comentario, FinSentencia, Punto, TipoDato, Accesor, Instruccion, Unknown, Error
+            Cadena, Caracter, Comentario, FinSentencia, Punto, Coma, TipoDato, Accesor, Instruccion,
+            Unknown, Error
         }
 
-        private int _Fila;
-        private int _Columna;
+        protected int _Fila;
+        protected int _Columna;
         protected StreamReader _Texto;
         private Grafo<IDTokens, char> _GrafoTokens;
         private Dictionary<IDTokens, List<int>> _NodosLex;
@@ -37,7 +38,7 @@ namespace Compilador.Analizadores.Lexico {
             StartGrafoTokens();
         }
 
-        public bool NextToken()
+        protected bool NextToken()
         {
             //o tambien heredar de Token ***
             char c; _Valor = "";
@@ -48,7 +49,7 @@ namespace Compilador.Analizadores.Lexico {
             while ((nodo = (arista = nodo[(char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
                 if ((c = (char)_Texto.Read()) == (char)10) {
                     _Fila++;
-                    _Columna = 0;
+                    _Columna = -1;
                 }
                 if (arista.Pass)
                     _Valor += c;
@@ -89,7 +90,7 @@ namespace Compilador.Analizadores.Lexico {
                 _GrafoTokens.EnlazarNodos(origen, destino, concatenar, restriccion);
         }
 
-        public void StartGrafoTokens()
+        private void StartGrafoTokens()
         {
             List<int> idx;
             _GrafoTokens.Add(IDTokens.Blanco);
@@ -222,13 +223,16 @@ namespace Compilador.Analizadores.Lexico {
             NewNodo(IDTokens.Punto, 1);
             idx = _NodosLex[IDTokens.Punto];
             Enlazar(idx[0], idx[1], '.');
-            
+
+            //Coma
+            NewNodo(IDTokens.Coma, 1);
+            idx = _NodosLex[IDTokens.Coma];
+            Enlazar(idx[0], idx[1], ',');
+
             //Unknown
             NewNodo(IDTokens.Unknown, 1);
             idx = _NodosLex[IDTokens.Unknown];
             Enlazar(idx[0], idx[1]);
-
-
         }
     }
 }
