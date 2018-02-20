@@ -24,12 +24,11 @@ namespace Compilador.Analizadores.Sintaxis {
         private Dictionary<string, IDTokens> _PReservadas;
         private Dictionary<string, Func<double, double, double>> _OpFactor;
         private Dictionary<string, Func<double, double, double>> _OpTermino;
+        private Dictionary<string, Func<double, double, double>> _OpPotencia;
 
         private List<string> _OutPut;
         private List<Token> _LogTokens;
         private List<Atributo> _LogAtributos;
-        //private Grafo<Action, string> _GrafoGram;
-        //private Dictionary<IDSentence, List<int>> _NodosSint;
 
         public Sintaxis(StreamReader texto) : base(texto)
         {
@@ -42,19 +41,20 @@ namespace Compilador.Analizadores.Sintaxis {
             _PReservadas = new Dictionary<string, IDTokens>();
             _OpFactor = new Dictionary<string, Func<double, double, double>>();
             _OpTermino = new Dictionary<string, Func<double, double, double>>();
+            _OpPotencia = new Dictionary<string, Func<double, double, double>>();
 
             _OpTermino.Add("+", (x, y) => x + y);
             _OpTermino.Add("-", (x, y) => x - y);
             _OpFactor.Add("*", (x, y) => x * y);
             _OpFactor.Add("/", (x, y) => x / y);
             _OpFactor.Add("%", (x, y) => x % y);
+            _OpPotencia.Add("^", (x, y) => Math.Pow(x, y));
+            _OpPotencia.Add("^!", (x, y) => Math.Pow(x, 1 / y));
             PReservadas(typeof(Instruccion), IDTokens.Instruccion);
             PReservadas(typeof(Atributo.Accesor), IDTokens.Accesor);
             PReservadas(typeof(Atributo.TypeDato), IDTokens.TipoDato);
             
             NextTokenTrue();
-            //_GrafoGram = new Grafo<Action, string>();
-            //_NodosSint = new Dictionary<IDSentence, List<int>>();
         }
 
         private void PReservadas(Type infoEnum, IDTokens asignToken)
@@ -181,12 +181,12 @@ namespace Compilador.Analizadores.Sintaxis {
                 }
                 NewAtrib();
             }
-
             Match(IDTokens.ParametrosFin);
+
             Match(IDTokens.BloqueInicio);
             while (_ID != IDTokens.BloqueFin) {
                 if (_Valor == "System") {
-                    WriteCon();
+                    WriteConsole();
                 }
                 switch (_ID) {
                     case IDTokens.TipoDato:
@@ -217,7 +217,7 @@ namespace Compilador.Analizadores.Sintaxis {
                     NewAtrib();
                     _BuffTipo = auxTipo;
                 } else break;
-            } while (true); //provisional
+            } while (true); //provisional, no puede ser FinSent debido a ",;"
 
             NewAtrib();
             Match(IDTokens.FinSentencia);
@@ -237,13 +237,13 @@ namespace Compilador.Analizadores.Sintaxis {
                     _BuffNombre = _Valor;
                     Match(IDTokens.Identificador);
                 } else break;
-            } while (true); //provisional
+            } while (true); //provisional, no puede ser FinSent debido a ",;"
 
             NewAtrib();
             Match(IDTokens.FinSentencia);
         }
 
-        private void WriteCon()
+        private void WriteConsole()
         {
             Match("System");
             Match(IDTokens.Punto);
@@ -252,7 +252,7 @@ namespace Compilador.Analizadores.Sintaxis {
             Match("WriteLine");
             Match(IDTokens.ParametrosInicio);
             if(_ID == IDTokens.Numero || _ID == IDTokens.Identificador) {
-                _OutPut.Add("" + Expresion());
+                _OutPut.Add("" + Expresion() + "\n");
             } else {
                 _OutPut.Add(_Valor.TrimStart('\"').TrimEnd('\"') + "\n");
                 Match(IDTokens.Cadena);
@@ -270,8 +270,6 @@ namespace Compilador.Analizadores.Sintaxis {
             if (_OpTermino.TryGetValue(_Valor, out op)) {
                 Match(IDTokens.OpTermino);
                 num = op(num, Expresion());
-                if (_ID == IDTokens.ParametrosFin)  //se movio esto
-                    Match(IDTokens.ParametrosFin);
             }
             return num;
         }
@@ -290,20 +288,42 @@ namespace Compilador.Analizadores.Sintaxis {
 
         private double Factor()
         {
+            Func<double, double, double> op;
+            double num = Potencia();
+
+            while (_OpPotencia.TryGetValue(_Valor, out op)) {
+                Match(IDTokens.OpPotencia);
+                num = op(num, Potencia());
+            }
+            return num;
+        }
+
+        private double Potencia()
+        {
             try {
                 double num;
                 switch (_ID) {
                     case IDTokens.ParametrosInicio:
                         Match(IDTokens.ParametrosInicio);
-                        return Expresion();
+                        num = Expresion();
+                        Match(IDTokens.ParametrosFin);
+                        return num;
+
                     case IDTokens.Identificador:
                         num = _TblAtrib[_Valor].Valor;
                         Match(IDTokens.Identificador);
                         return num;
+
+                    case IDTokens.OpTermino:
+                        string signo = _Valor;
+                        Match(IDTokens.OpTermino);
+                        return double.Parse(signo + Potencia());
+
                     case IDTokens.Numero:
                         num = double.Parse(_Valor);
                         Match(IDTokens.Numero);
                         return num;
+
                     default:
                         throw new InvalidDataException(String.Format("Se espera Numero, en la Linea {0}, Columna {1}",
                             _Fila, _Columna));
@@ -352,106 +372,6 @@ namespace Compilador.Analizadores.Sintaxis {
         public List<string> OutPut { get => _OutPut; }
         public List<Token> LogTokens { get => _LogTokens; }
         public List<Atributo> LogAtributos { get => _LogAtributos; }
-
-        //private void Enlazar(int origen, int destino, params string[] restriccion)
-        //{
-        //    if (restriccion.Length == 0)
-        //        _GrafoGram.EnlazarNodos(origen, destino);
-        //    else
-        //        _GrafoGram.EnlazarNodos(origen, destino, restriccion);
-        //}
-
-        //private void Enlazar(int origen, int destino, bool concatenar, params string[] restriccion)
-        //{
-        //    if (restriccion.Length == 0)
-        //        _GrafoGram.EnlazarNodos(origen, destino, concatenar);
-        //    else
-        //        _GrafoGram.EnlazarNodos(origen, destino, concatenar, restriccion);
-        //}
-
-        //private void NewNodo(IDSentence categoria, int cantidad)
-        //{
-        //    List<int> listaNodos;
-        //    bool newKey;
-        //    listaNodos = (newKey = !_NodosSint.TryGetValue(categoria, out listaNodos)) ? 
-        //        new List<int>() { 0 } : listaNodos;
-        //    for (int i = 0; i < cantidad; i++) {
-        //        listaNodos.Add(_GrafoGram.Add(null));
-        //    }
-
-        //    if (newKey)
-        //        _NodosSint.Add(categoria, listaNodos);
-        //}
-
-        //public void NextSentence()
-        //{
-        //    Nodo<IDTokens, char>.Arista arista;
-        //    var nodo = _GrafoGram.IndiceNodos[0];
-
-        //    //Se debe usar match simultaneamente **
-        //    while ((nodo = nodo[_Valor].Nodo ?? nodo[_ID.ToString()].Nodo) != null && !_Texto.EndOfStream) {
-        //        nodo.Valor?.Invoke();
-        //        Match(_Valor);
-        //    }
-
-        //}
-
-        //public void InitGrafoGram()
-        //{
-        //    List<int> idx;
-
-        //    string tipoDato = "Double";
-        //    double valor = 0;
-        //    string accesor = "Private";
-        //    string nombre = "";
-        //    //_GrafoGram.Add(() => { return; }); //Ejemplo
-
-        //    _GrafoGram.Add(null);
-
-        //    //Fin
-        //    NewNodo(IDSentence.Fin, 1);
-        //    idx = _NodosSint[IDSentence.Fin];
-
-        //    //Metodo
-        //    NewNodo(IDSentence.Metodo, 10);
-        //    idx =_NodosSint[IDSentence.Metodo];
-        //    Enlazar(idx[0], idx[1], Enum.GetNames(typeof(Atributo.Accesor)));
-        //    //Enlazar(idx[]);
-
-
-
-        //    //Referencias using
-        //    NewNodo(IDSentence.Referencia, 4);
-        //    idx = _NodosSint[IDSentence.Referencia];
-        //    Enlazar(idx[0], idx[1], "using");
-        //    Enlazar(idx[1], idx[2], IDTokens.Identificador.ToString());
-        //    Enlazar(idx[2], idx[3], ";");
-        //    Enlazar(idx[2], idx[4], ".");
-        //    Enlazar(idx[4], idx[2], IDTokens.Identificador.ToString());
-
-        //    //Asignacion // recursivo
-        //    NewNodo(IDSentence.Asignacion, 10);
-        //    idx = _NodosSint[IDSentence.Asignacion];
-        //    Enlazar(idx[1], idx[2], "=");
-        //    Enlazar(idx[2], idx[3], IDTokens.Numero.ToString(), IDTokens.Identificador.ToString());
-        //    _GrafoGram[idx[3]].Valor = () => _TblAtrib[nombre].Valor = Expresion();
-        //    //Enlazar(idx[3], );
-
-        //    //Declaracion
-        //    NewNodo(IDSentence.Declaracion, 10);
-        //    idx = _NodosSint[IDSentence.Declaracion];
-        //    Enlazar(idx[0], idx[1], Enum.GetNames(typeof(Atributo.TypeDato)));
-        //    _GrafoGram[idx[1]].Valor = () => tipoDato = _Valor;
-
-        //    Enlazar(idx[1], idx[2], IDTokens.Identificador.ToString());
-        //    _GrafoGram[idx[2]].Valor = () => {
-        //        nombre = _Valor;
-        //        _TblAtrib.Add(new Atributo(nombre, valor, tipoDato, accesor));
-        //        return;
-        //    };
-        //    Enlazar(idx[2], _NodosSint[IDSentence.Asignacion][2], "=");
-        //    Enlazar(idx[2], idx[3], ";");
-        //}
 
     }
 }

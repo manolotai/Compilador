@@ -15,10 +15,10 @@ namespace Compilador.Analizadores.Lexico {
         static private char[] Letras = LetrasMayus.Concat(LetrasMinus).ToArray();
         static private char[] LetrasNumeros = Letras.Concat(Numeros).ToArray();
         public enum IDTokens {
-            Blanco, Identificador, Numero, OpTermino, OpFactor, OpAsignacion, OpIncremento,
-            OpLogico, OpComparacion, ParametrosInicio, ParametrosFin, BloqueInicio, BloqueFin,
-            Cadena, Caracter, Comentario, FinSentencia, Punto, Coma, TipoDato, Accesor, Instruccion,
-            Unknown, Error
+            Blanco, Identificador, Numero, OpTermino, OpFactor, OpPotencia, OpAsignacion,
+            OpIncremento, OpLogico, OpComparacion, ParametrosInicio, ParametrosFin, BloqueInicio,
+            BloqueFin, Cadena, Caracter, Comentario, FinSentencia, Punto, Coma,
+            TipoDato, Accesor, Instruccion, Unknown, Error
         }
 
         protected int _Fila;
@@ -123,13 +123,12 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(idx[1], _NodosLex[IDTokens.Error][1], '.');
             Enlazar(_NodosLex[IDTokens.Error][1], idx[2], Numeros);
             Enlazar(idx[2], idx[2], Numeros);
+            Enlazar(idx[1], _NodosLex[IDTokens.Error][2], 'e');
             Enlazar(idx[2], _NodosLex[IDTokens.Error][2], 'e');
             Enlazar(_NodosLex[IDTokens.Error][2], _NodosLex[IDTokens.Error][3], '+', '-');
             Enlazar(_NodosLex[IDTokens.Error][2], idx[3], Numeros);
             Enlazar(_NodosLex[IDTokens.Error][3], idx[3], Numeros);
             Enlazar(idx[3], idx[3], Numeros);
-            //Enlazar(_NodosLex[IDTokens.OpTermino][1], idx[1], Numeros);//"+"
-            //Enlazar(_NodosLex[IDTokens.OpTermino][2], idx[1], Numeros);//"-"
 
             //OpFactores
             NewNodo(IDTokens.OpFactor, 3);
@@ -137,6 +136,12 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(idx[0], idx[1], '*');
             Enlazar(idx[0], idx[2], '/');
             Enlazar(idx[0], idx[3], '%');
+
+            //OpPotencia
+            NewNodo(IDTokens.OpPotencia, 2);
+            idx = _NodosLex[IDTokens.OpPotencia];
+            Enlazar(idx[0], idx[1], '^');
+            Enlazar(idx[1], idx[2], '!');
 
             //OpAsignacion
             NewNodo(IDTokens.OpAsignacion, 1);
