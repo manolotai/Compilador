@@ -16,6 +16,13 @@ namespace Compilador.Grafo {
             _IndiceNodos = new Dictionary<int, Nodo<TID, TAristas>>();
         }
 
+        public int Add()
+        {
+            _IndiceNodos.Add(_IntLiberados.Count == 0 ? _IdxHead++ : _IntLiberados.Dequeue(),
+                new Nodo<TID, TAristas>());
+            return _IdxHead - 1;
+        }
+
         public int Add(TID valor)
         {
             _IndiceNodos.Add(_IntLiberados.Count == 0 ? _IdxHead++ : _IntLiberados.Dequeue(),

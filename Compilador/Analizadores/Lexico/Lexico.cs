@@ -16,8 +16,8 @@ namespace Compilador.Analizadores.Lexico {
         static private char[] LetrasNumeros = Letras.Concat(Numeros).ToArray();
         public enum IDTokens {
             Blanco, Identificador, Numero, OpTermino, OpFactor, OpPotencia, OpAsignacion,
-            OpIncremento, OpLogico, OpComparacion, ParametrosInicio, ParametrosFin, BloqueInicio,
-            BloqueFin, Cadena, Caracter, Comentario, FinSentencia, Punto, Coma,
+            OpIncremento, OpLogico, OpComparacion, InitParametros, FinParametros, InitBloque,
+            FinBloque, Cadena, Caracter, Comentario, FinSentencia, Punto, Coma,
             TipoDato, Accesor, Instruccion, Unknown, Error
         }
 
@@ -40,7 +40,6 @@ namespace Compilador.Analizadores.Lexico {
 
         protected bool NextToken()
         {
-            //o tambien heredar de Token ***
             char c; _Valor = "";
             bool isToken = !_Texto.EndOfStream;
             Nodo<IDTokens, char>.Arista arista;
@@ -200,23 +199,23 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(idx[1], idx[2], '\'');
 
             //InicioParametros
-            NewNodo(IDTokens.ParametrosInicio, 1);
-            idx = _NodosLex[IDTokens.ParametrosInicio];
+            NewNodo(IDTokens.InitParametros, 1);
+            idx = _NodosLex[IDTokens.InitParametros];
             Enlazar(idx[0], idx[1], '(');
 
             //FinParametros
-            NewNodo(IDTokens.ParametrosFin, 1);
-            idx = _NodosLex[IDTokens.ParametrosFin];
+            NewNodo(IDTokens.FinParametros, 1);
+            idx = _NodosLex[IDTokens.FinParametros];
             Enlazar(idx[0], idx[1], ')');
 
             //InicioBloque
-            NewNodo(IDTokens.BloqueInicio, 1);
-            idx = _NodosLex[IDTokens.BloqueInicio];
+            NewNodo(IDTokens.InitBloque, 1);
+            idx = _NodosLex[IDTokens.InitBloque];
             Enlazar(idx[0], idx[1], '{');
 
             //FinBloque
-            NewNodo(IDTokens.BloqueFin, 1);
-            idx = _NodosLex[IDTokens.BloqueFin];
+            NewNodo(IDTokens.FinBloque, 1);
+            idx = _NodosLex[IDTokens.FinBloque];
             Enlazar(idx[0], idx[1], '}');
 
             //FinSentencia

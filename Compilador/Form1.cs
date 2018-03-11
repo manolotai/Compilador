@@ -61,7 +61,7 @@ namespace Compilador {
                 //}
                 try {
                     Sintaxis test = new Sintaxis(readStrm);
-                    test.AnalisisSintactico();
+                    test.AnalizarSintaxis();
 
                     foreach (var item in test.OutPut) {
                         __TxtRConsola.Text += item;

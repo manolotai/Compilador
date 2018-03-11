@@ -10,6 +10,13 @@ namespace Compilador.Grafo {
         private List<Arista> _AristasFree;
         private Dictionary<TAristas, Arista> _AristasLock;
 
+        public Nodo()
+        {
+            _Valor = default(TValor);
+            _AristasFree = new List<Arista>();
+            _AristasLock = new Dictionary<TAristas, Arista>();
+        }
+
         public Nodo(TValor valor)
         {
             _Valor = valor;
@@ -25,6 +32,13 @@ namespace Compilador.Grafo {
         public void AddNodo(Nodo<TValor, TAristas> nodo, TAristas restriccion, bool pass = true)
         {
             AristasLock.Add(restriccion, new Arista(nodo, pass));
+        }
+
+        public Arista TryGetPass(TAristas idx)
+        {
+            Arista arista;
+            _AristasLock.TryGetValue(idx, out arista);
+            return arista;
         }
 
         public Arista this[TAristas idx] {

@@ -11,8 +11,9 @@ using Compilador.Analizadores.Lexico;
 namespace Compilador.Analizadores.Sintaxis {
     public class Sintaxis : Lexico.Lexico {
 
-        //Dictionary<> //atributos
-        public enum IDSentence { Blanco, Referencia, Declaracion, Asignacion, Metodo, Fin }
+        public enum IDSintaxis {
+            Blanco, Referencia, NameSpace, Clase, Metodo, Declaracion, Asignacion
+        }
         private enum Instruccion { Using, NameSpace, Class, If, For }
         
         private string _BuffTipo;
@@ -30,8 +31,14 @@ namespace Compilador.Analizadores.Sintaxis {
         private List<Token> _LogTokens;
         private List<Atributo> _LogAtributos;
 
+        private Grafo<AccionMatch, string> _GrafoSintaxis;
+        private Dictionary<IDSintaxis, List<int>> _ISint;
+
         public Sintaxis(StreamReader texto) : base(texto)
         {
+            _GrafoSintaxis = new Grafo<AccionMatch, string>();
+            _ISint = new Dictionary<IDSintaxis, List<int>>();
+
             ResetBuffer();
             
             _TblAtrib = new TablaAtributos();
@@ -55,6 +62,78 @@ namespace Compilador.Analizadores.Sintaxis {
             PReservadas(typeof(Atributo.TypeDato), IDTokens.TipoDato);
             
             NextTokenTrue();
+            InitGragoSintaxis();
+
+        }
+
+        public void AnalizarSintaxis()
+        {
+            while (!_Texto.EndOfStream) {
+                var nodo = _GrafoSintaxis[0]; //poner asi en _grafolexico
+                while ((nodo = (nodo.TryGetPass(_Valor).Nodo ??
+                    nodo[_ID.ToString()].Nodo)) != null) {
+
+                    nodo.Valor.Accion?.Invoke();
+                    if (nodo.Valor.IsMatch)
+                        if(nodo.Valor.Match == null)
+                            Match(_ID);
+                        else
+                            nodo.Valor.Match();
+                }
+            }
+        }
+
+        private void NewNodo(IDSintaxis valor, int cantidad)
+        {
+            List<int> listaNodos;
+            bool newKey;
+            listaNodos = (newKey = !_ISint.TryGetValue(valor, out listaNodos)) ?
+                new List<int>() { 0 } : listaNodos;
+            for (int i = 0; i < cantidad; i++) {
+                listaNodos.Add(_GrafoSintaxis.Add(new AccionMatch()));
+            }
+
+            if (newKey)
+                _ISint.Add(valor, listaNodos);
+        }
+
+        private void Enlazar(int origen, int destino,
+            bool? match = null, Action accion = null)
+        {
+            if (accion != null)
+                _GrafoSintaxis[destino].Valor.Accion = accion;
+
+            if (match != null)
+                _GrafoSintaxis[destino].Valor.IsMatch = match.Value;
+            _GrafoSintaxis.EnlazarNodos(origen, destino);
+        }
+
+        private void Enlazar(int origen, int destino, bool free = false,
+            Action accion = null, params IDTokens[] match)
+        {
+            if(accion != null)
+                _GrafoSintaxis[destino].Valor.Accion = accion;
+
+            if (free) {
+                _GrafoSintaxis.EnlazarNodos(origen, destino);
+                foreach (var item in match)
+                    _GrafoSintaxis[destino].Valor.Match = () => Match(item);
+            } else 
+                _GrafoSintaxis.EnlazarNodos(origen, destino, match.Select(p => p.ToString()));
+        }
+
+        private void Enlazar(int origen, int destino, bool free = false,
+            Action accion = null, params string[] match)
+        {
+            if (accion != null)
+                _GrafoSintaxis[destino].Valor.Accion = accion;
+
+            if (free) {
+                _GrafoSintaxis.EnlazarNodos(origen, destino);
+                foreach (var item in match)
+                    _GrafoSintaxis[destino].Valor.Match = () => Match(item);
+            } else
+                _GrafoSintaxis.EnlazarNodos(origen, destino, match);
         }
 
         private void PReservadas(Type infoEnum, IDTokens asignToken)
@@ -79,6 +158,85 @@ namespace Compilador.Analizadores.Sintaxis {
             _BuffNombre = "";
             _BuffTipo = "Unknown";
             _BuffAccesor = "Private";
+        }
+
+        private void InitGragoSintaxis()
+        {
+            var accesores = new string[] { "public", "private", "protected" };
+            var tipos = new string[] { "void", "char", "int", "float", "double" };
+            List<int> i;
+            _GrafoSintaxis.Add();
+
+            //Referencia
+            NewNodo(IDSintaxis.Referencia, 4);
+            i = _ISint[IDSintaxis.Referencia];
+            Enlazar(i[0], i[1], match: "using");
+            Enlazar(i[1], i[2], true, match: IDTokens.Identificador);
+            Enlazar(i[2], i[1], match: IDTokens.Punto);
+            Enlazar(i[2], i[3], true, match: IDTokens.FinSentencia);
+
+
+            //Asignacion
+            NewNodo(IDSintaxis.Asignacion, 10);
+            i = _ISint[IDSintaxis.Asignacion];
+            Enlazar(i[1], i[2], match: IDTokens.OpAsignacion);
+            Enlazar(i[2], i[3], accion: () => _BuffValor = "" + Expresion());
+            Enlazar(i[3], i[4], true, () => NewAtrib(), IDTokens.FinSentencia);
+
+
+
+            //Declaracion
+            NewNodo(IDSintaxis.Declaracion, 10);
+            i = _ISint[IDSintaxis.Declaracion];
+            Enlazar(i[1], i[2], true, () =>  _BuffTipo = _Valor, tipos );
+            Enlazar(i[2], i[3], true, () => _BuffNombre = _Valor, IDTokens.Identificador);
+            Enlazar(i[3], _ISint[IDSintaxis.Asignacion][1]);
+            Enlazar(i[3], i[4], true, match: IDTokens.FinSentencia);
+
+
+            //Metodo
+            NewNodo(IDSintaxis.Metodo, 10);
+            i = _ISint[IDSintaxis.Metodo];
+            Enlazar(i[1], i[2], match: accesores, accion: () => _BuffAccesor = _Valor);
+            Enlazar(i[1], i[3], match: tipos, accion: () => _BuffTipo = _Valor);
+            Enlazar(i[1], i[4], match: IDTokens.Identificador, accion: () => _BuffNombre = _Valor);
+
+            //Clase
+            NewNodo(IDSintaxis.Clase, 20);
+            i = _ISint[IDSintaxis.Clase];
+            Enlazar(i[1], i[2], match: accesores);
+            Enlazar(i[1], i[3], match: "class");
+            Enlazar(i[2], i[3], match: "class");
+            Enlazar(i[3], i[4], true, match: IDTokens.Identificador);
+
+            Enlazar(i[4], i[5], true, match: IDTokens.InitBloque);
+            Enlazar(i[5], i[6], true, match: IDTokens.FinBloque);
+            Enlazar(i[5], i[7], match: accesores, accion: () => _BuffAccesor = _Valor);
+            Enlazar(i[5], i[8], match: tipos, accion: () => _BuffTipo = _Valor);
+            Enlazar(i[5], i[9], match: IDTokens.Identificador, accion: () => _BuffNombre = _Valor);
+            Enlazar(i[6], i[1]);
+            Enlazar(i[7], i[8], match: tipos);
+            Enlazar(i[8], _ISint[IDSintaxis.Declaracion][2], match: false); // identi puede ser optativo o no
+            Enlazar(i[9], i[10], match: IDTokens.OpAsignacion);
+            Enlazar(i[9], i[12], true, match: IDTokens.FinSentencia, accion: () => NewAtrib());
+            Enlazar(i[10], i[11], match: true, accion: () => _BuffValor = "" + Expresion());//revisar aqui
+            Enlazar(i[11], i[12], true, match: IDTokens.FinSentencia);
+            Enlazar(i[12], i[5]);
+
+
+
+            //Enlazar(i[5], _ISint[IDSintaxis.Metodo][1]);
+            //Enlazar(_ISint[IDSintaxis.Metodo][1], i[6], true, match: IDTokens.FinBloque);
+
+            //NameSpace
+            NewNodo(IDSintaxis.NameSpace, 10);
+            i = _ISint[IDSintaxis.NameSpace];
+            Enlazar(i[0], i[1], match: "NameSpace");
+            Enlazar(i[1], i[2], true, match: IDTokens.Identificador);
+            Enlazar(i[2], i[1], match: IDTokens.Punto);
+            Enlazar(i[2], i[3], true, match: IDTokens.InitBloque);
+            Enlazar(i[3], _ISint[IDSintaxis.Clase][1], match: true);
+            Enlazar(_ISint[IDSintaxis.Clase][1], i[4], true, match: IDTokens.FinBloque);
         }
 
         public void AnalisisSintactico()
@@ -112,10 +270,10 @@ namespace Compilador.Analizadores.Sintaxis {
                     Match(IDTokens.Punto);
                     continue;
                 }
-            } while (_ID != IDTokens.BloqueInicio);
-            Match(IDTokens.BloqueInicio);
+            } while (_ID != IDTokens.InitBloque);
+            Match(IDTokens.InitBloque);
             Clase();
-            Match(IDTokens.BloqueFin);
+            Match(IDTokens.FinBloque);
         }
 
         private void Clase()
@@ -124,7 +282,7 @@ namespace Compilador.Analizadores.Sintaxis {
                 Match(IDTokens.Accesor);
             Match("Class");
             Match(IDTokens.Identificador);
-            Match(IDTokens.BloqueInicio);
+            Match(IDTokens.InitBloque);
             
             do {
                 if(_ID == IDTokens.Accesor) {
@@ -138,7 +296,7 @@ namespace Compilador.Analizadores.Sintaxis {
                     Match(IDTokens.Identificador);
 
                     switch (_ID) {
-                        case IDTokens.ParametrosInicio:
+                        case IDTokens.InitParametros:
                             Metodo();
                             ResetBuffer();
                             break;
@@ -158,13 +316,13 @@ namespace Compilador.Analizadores.Sintaxis {
                     ResetBuffer();
                 }
 
-            } while (_ID != IDTokens.BloqueFin);
-            Match(IDTokens.BloqueFin);
+            } while (_ID != IDTokens.FinBloque);
+            Match(IDTokens.FinBloque);
         }
 
         private void Metodo()
         {
-            Match(IDTokens.ParametrosInicio);
+            Match(IDTokens.InitParametros);
             _TblAtrib.NewAmbito();
 
             while (_ID == IDTokens.TipoDato) {
@@ -181,10 +339,10 @@ namespace Compilador.Analizadores.Sintaxis {
                 }
                 NewAtrib();
             }
-            Match(IDTokens.ParametrosFin);
+            Match(IDTokens.FinParametros);
 
-            Match(IDTokens.BloqueInicio);
-            while (_ID != IDTokens.BloqueFin) {
+            Match(IDTokens.InitBloque);
+            while (_ID != IDTokens.FinBloque) {
                 if (_Valor == "System") {
                     WriteConsole();
                 }
@@ -195,9 +353,12 @@ namespace Compilador.Analizadores.Sintaxis {
                     case IDTokens.FinSentencia:
                         Match(IDTokens.FinSentencia);
                         break;
+                    //default:
+                    //    throw new InvalidDataException(String.Format("No reconocido, en la Linea {0}, Columna {1}",
+                    //        _Fila, _Columna));
                 }
             }
-            Match(IDTokens.BloqueFin);
+            Match(IDTokens.FinBloque);
             _TblAtrib.DelAmbito();
         }
 
@@ -250,14 +411,14 @@ namespace Compilador.Analizadores.Sintaxis {
             Match("Console");
             Match(IDTokens.Punto);
             Match("WriteLine");
-            Match(IDTokens.ParametrosInicio);
+            Match(IDTokens.InitParametros);
             if(_ID == IDTokens.Numero || _ID == IDTokens.Identificador) {
                 _OutPut.Add("" + Expresion() + "\n");
             } else {
                 _OutPut.Add(_Valor.TrimStart('\"').TrimEnd('\"') + "\n");
                 Match(IDTokens.Cadena);
             } 
-            Match(IDTokens.ParametrosFin);
+            Match(IDTokens.FinParametros);
             Match(IDTokens.FinSentencia);
         }
 
@@ -303,10 +464,10 @@ namespace Compilador.Analizadores.Sintaxis {
             try {
                 double num;
                 switch (_ID) {
-                    case IDTokens.ParametrosInicio:
-                        Match(IDTokens.ParametrosInicio);
+                    case IDTokens.InitParametros:
+                        Match(IDTokens.InitParametros);
                         num = Expresion();
-                        Match(IDTokens.ParametrosFin);
+                        Match(IDTokens.FinParametros);
                         return num;
 
                     case IDTokens.Identificador:

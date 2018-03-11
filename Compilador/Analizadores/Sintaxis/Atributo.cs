@@ -14,7 +14,10 @@ namespace Compilador.Analizadores.Sintaxis {
         private TypeDato _TipoDato;
         private Accesor _Acceso;
         
-
+        //float 4 bytes -> 0 - 4294967296 //int 0 - 655335 // char 0 - 255
+        //cast tiene que ver con la parte baja y parte alta de ensamblador
+        //cast explicito
+        //overflow
         public Atributo(string nombre, double valor, string tipoDato, string accesor)
         {
             _Nombre = nombre;
