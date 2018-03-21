@@ -44,6 +44,17 @@ namespace Compilador {
             _TablaAtributos.Columns.Add("Tipo", typeof(string));
             _TablaAtributos.Columns.Add("Accesor", typeof(string));
             __DataGVAtributos.DataSource = _TablaAtributos;
+
+            int n = 10;
+
+            Console.WriteLine(BitConverter.IsLittleEndian);
+            foreach (var item in BitConverter.GetBytes(4294967295)) {
+                Console.Write(item + ".");
+            }
+            Console.WriteLine();
+            foreach (var item in BitConverter.GetBytes(4294967297)) {
+                Console.Write(item + ".");
+            }
         }
 
         private void __BtnCompilar_Click(object sender, EventArgs e)

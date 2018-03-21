@@ -24,27 +24,30 @@ namespace Compilador.Grafo {
             _AristasLock = new Dictionary<TAristas, Arista>();
         }
 
-        public void AddNodo(Nodo<TValor, TAristas> nodo, bool pass = true)
+        public void AddNodo(Nodo<TValor, TAristas> nodo,
+            bool pass = true, Action accion = null)
         {
-            _AristasFree.Add(new Arista(nodo, pass));
+            _AristasFree.Add(new Arista(nodo, accion, pass));
         }
 
-        public void AddNodo(Nodo<TValor, TAristas> nodo, TAristas restriccion, bool pass = true)
+        public void AddNodo(Nodo<TValor, TAristas> nodo, TAristas restriccion, 
+            bool pass = true, Action accion = null)
         {
-            AristasLock.Add(restriccion, new Arista(nodo, pass));
+            AristasLock.Add(restriccion, new Arista(nodo, accion, pass));
         }
 
-        public Arista TryGetPass(TAristas idx)
+        public Arista? TryGetPass(TAristas idx)
         {
             Arista arista;
-            _AristasLock.TryGetValue(idx, out arista);
+            if (!_AristasLock.TryGetValue(idx, out arista))
+                return null;
             return arista;
         }
 
         public Arista this[TAristas idx] {
             get {
                 Arista arista = !_AristasLock.TryGetValue(idx, out arista) ?
-                    _AristasFree.FirstOrDefault(arst => arst.Pass) : arista;
+                    _AristasFree.FirstOrDefault(/*arst => arst.Pass*/) : arista;
                 return arista;
             }
         }
@@ -55,12 +58,15 @@ namespace Compilador.Grafo {
 
         public struct Arista {
             public bool Pass;
+            public Action Accion;
             public Nodo<TValor, TAristas> Nodo;
 
-            public Arista(Nodo<TValor, TAristas> nodo, bool pass = true)
+            public Arista(Nodo<TValor, TAristas> nodo, 
+                Action accion = null, bool pass = true)
             {
                 Pass = pass;
                 Nodo = nodo;
+                Accion = accion;
             }
         }
     }

@@ -48,7 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analizadores\Sintaxis\AccionMatch.cs" />
+    <Compile Include="Analizadores\Sintaxis\NodoSintaxis.cs" />
     <Compile Include="Analizadores\Sintaxis\Atributo.cs" />
     <Compile Include="Analizadores\Sintaxis\Sintaxis.cs" />
     <Compile Include="Analizadores\Sintaxis\TablaValores.cs" />

@@ -86,7 +86,7 @@ namespace Compilador.Analizadores.Lexico {
             if (restriccion.Length == 0)
                 _GrafoTokens.EnlazarNodos(origen, destino, concatenar);
             else
-                _GrafoTokens.EnlazarNodos(origen, destino, concatenar, restriccion);
+                _GrafoTokens.EnlazarNodos(origen, destino, concatenar, key: restriccion);
         }
 
         private void StartGrafoTokens()

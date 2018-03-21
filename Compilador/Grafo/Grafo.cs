@@ -30,39 +30,22 @@ namespace Compilador.Grafo {
             return _IdxHead - 1;
         }
 
-        //public Tuple<int, int> AddEnlazar(
-        //    Nodo<TID, TAristas> origen, Nodo<TID, TAristas> destino, 
-        //    params TAristas[] restriccion)
-        //{
-        //    _IndiceNodos.Add(_IntLiberados.Count == 0 ? _IdxHead++ : _IntLiberados.Dequeue(),
-        //        new );
-        //}
-
         public void EnlazarNodos(int origen, int destino,
-            IEnumerable<TAristas> restriccion, bool pass = true)
+            IEnumerable<TAristas> key, bool pass = true, Action accion = null)
         {
-            foreach (var item in restriccion) {
-                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass);
+            foreach (var item in key) {
+                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass, accion);
             }
         }
 
-        public void EnlazarNodos(int origen, int destino, params TAristas[] restriccion)
+        public void EnlazarNodos(int origen, int destino, bool pass = true, Action accion = null,
+            params TAristas[] key)
         {
-            if(restriccion.Length == 0)
-                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino]);
+            if (key.Length == 0)
+                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], pass: pass, accion: accion);
             else
-                foreach (var item in restriccion)
-                    _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item);
-        }
-
-        public void EnlazarNodos(int origen, int destino, bool pass,
-            params TAristas[] restriccion)
-        {
-            if (restriccion.Length == 0)
-                _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], pass);
-            else
-                foreach (var item in restriccion)
-                    _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass);
+                foreach (var item in key)
+                    _IndiceNodos[origen].AddNodo(_IndiceNodos[destino], item, pass, accion);
         }
 
         public Dictionary<int, Nodo<TID, TAristas>> IndiceNodos { get => _IndiceNodos; }

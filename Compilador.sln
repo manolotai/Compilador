@@ -5,16 +5,6 @@ VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compilador", "Compilador\Compilador.csproj", "{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Examen5Marzo", "..\..\..\Arduino\Examen5Marzo\Examen5Marzo.vcxproj", "{535A0239-CFB2-4DC9-AD3B-E12380184FB7}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlinkLed", "..\..\..\..\Desktop\Escuela\semestre 8\Sist progr\BlinkLed\BlinkLed.vcxproj", "{34306ADF-31FC-4F90-8B28-4A59360F1589}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Caracter", "..\..\..\Arduino\Caracter\Caracter.vcxproj", "{D3B77350-FA89-494A-9AD8-6EF4DE5FFA11}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BotonAMorse", "..\..\..\Arduino\BotonAMorse\BotonAMorse.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "semaforoPeatones", "..\..\..\..\Desktop\Escuela\semestre 8\Sist progr\semaforoPeatones\semaforoPeatones.vcxproj", "{3376DA0B-D8E4-49DE-93DD-16899EAD9A82}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,36 +21,6 @@ Global
 		{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}.Release|x86.ActiveCfg = Release|Any CPU
 		{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}.Release|x86.Build.0 = Release|Any CPU
-		{535A0239-CFB2-4DC9-AD3B-E12380184FB7}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{535A0239-CFB2-4DC9-AD3B-E12380184FB7}.Debug|x86.ActiveCfg = Debug|Win32
-		{535A0239-CFB2-4DC9-AD3B-E12380184FB7}.Debug|x86.Build.0 = Debug|Win32
-		{535A0239-CFB2-4DC9-AD3B-E12380184FB7}.Release|Any CPU.ActiveCfg = Release|Win32
-		{535A0239-CFB2-4DC9-AD3B-E12380184FB7}.Release|x86.ActiveCfg = Release|Win32
-		{535A0239-CFB2-4DC9-AD3B-E12380184FB7}.Release|x86.Build.0 = Release|Win32
-		{34306ADF-31FC-4F90-8B28-4A59360F1589}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{34306ADF-31FC-4F90-8B28-4A59360F1589}.Debug|x86.ActiveCfg = Debug|Win32
-		{34306ADF-31FC-4F90-8B28-4A59360F1589}.Debug|x86.Build.0 = Debug|Win32
-		{34306ADF-31FC-4F90-8B28-4A59360F1589}.Release|Any CPU.ActiveCfg = Release|Win32
-		{34306ADF-31FC-4F90-8B28-4A59360F1589}.Release|x86.ActiveCfg = Release|Win32
-		{34306ADF-31FC-4F90-8B28-4A59360F1589}.Release|x86.Build.0 = Release|Win32
-		{D3B77350-FA89-494A-9AD8-6EF4DE5FFA11}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{D3B77350-FA89-494A-9AD8-6EF4DE5FFA11}.Debug|x86.ActiveCfg = Debug|Win32
-		{D3B77350-FA89-494A-9AD8-6EF4DE5FFA11}.Debug|x86.Build.0 = Debug|Win32
-		{D3B77350-FA89-494A-9AD8-6EF4DE5FFA11}.Release|Any CPU.ActiveCfg = Release|Win32
-		{D3B77350-FA89-494A-9AD8-6EF4DE5FFA11}.Release|x86.ActiveCfg = Release|Win32
-		{D3B77350-FA89-494A-9AD8-6EF4DE5FFA11}.Release|x86.Build.0 = Release|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.ActiveCfg = Debug|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.Build.0 = Debug|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|Any CPU.ActiveCfg = Release|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
-		{3376DA0B-D8E4-49DE-93DD-16899EAD9A82}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{3376DA0B-D8E4-49DE-93DD-16899EAD9A82}.Debug|x86.ActiveCfg = Debug|Win32
-		{3376DA0B-D8E4-49DE-93DD-16899EAD9A82}.Debug|x86.Build.0 = Debug|Win32
-		{3376DA0B-D8E4-49DE-93DD-16899EAD9A82}.Release|Any CPU.ActiveCfg = Release|Win32
-		{3376DA0B-D8E4-49DE-93DD-16899EAD9A82}.Release|x86.ActiveCfg = Release|Win32
-		{3376DA0B-D8E4-49DE-93DD-16899EAD9A82}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
