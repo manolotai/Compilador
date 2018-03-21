@@ -18,7 +18,7 @@ namespace Compilador.Analizadores.Lexico {
             Blanco, Identificador, Numero, OpTermino, OpFactor, OpPotencia, OpAsignacion,
             OpIncremento, OpLogico, OpComparacion, InitParametros, FinParametros, InitBloque,
             FinBloque, Cadena, Caracter, Comentario, FinSentencia, Punto, Coma,
-            TipoDato, Accesor, Instruccion, Unknown, Error
+            Booleano, TipoDato, Accesor, Instruccion, Unknown, Error
         }
 
         protected int _Fila;

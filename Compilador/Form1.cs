@@ -44,9 +44,11 @@ namespace Compilador {
             _TablaAtributos.Columns.Add("Tipo", typeof(string));
             _TablaAtributos.Columns.Add("Accesor", typeof(string));
             __DataGVAtributos.DataSource = _TablaAtributos;
-
-            int n = 10;
-
+            
+            float l = (char)((((45.8 - 45.8 % 1) % 655366) / (257 % 256)) * 3) + 65401;
+            Console.WriteLine(l);
+            
+            Console.WriteLine(sizeof(Boolean));
             Console.WriteLine(BitConverter.IsLittleEndian);
             foreach (var item in BitConverter.GetBytes(4294967295)) {
                 Console.Write(item + ".");
@@ -72,7 +74,7 @@ namespace Compilador {
                 //}
                 try {
                     Sintaxis test = new Sintaxis(readStrm);
-                    test.AnalizarSintaxis();
+                    test.AnalisisSintactico();
 
                     foreach (var item in test.OutPut) {
                         __TxtRConsola.Text += item;
