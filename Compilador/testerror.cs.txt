@@ -1,0 +1,5 @@
+NameSpace def{
+Class men{
+
+}
+}//a

@@ -29,14 +29,15 @@
             this.@__PanelSP1 = new System.Windows.Forms.SplitContainer();
             this.@__PanelSP1_1 = new System.Windows.Forms.SplitContainer();
             this.@__TxtRCsFile = new System.Windows.Forms.RichTextBox();
+            this.@__BtnChangeCs = new System.Windows.Forms.Button();
             this.@__BtnCompilar = new System.Windows.Forms.Button();
             this.@__PanelSP1_2 = new System.Windows.Forms.SplitContainer();
+            this.@__TxtRConsola = new System.Windows.Forms.RichTextBox();
             this.@__PanelTab1 = new System.Windows.Forms.TabControl();
             this.@__TabPage1 = new System.Windows.Forms.TabPage();
             this.@__DataGVTokens = new System.Windows.Forms.DataGridView();
             this.@__TabPage2 = new System.Windows.Forms.TabPage();
             this.@__DataGVAtributos = new System.Windows.Forms.DataGridView();
-            this.@__TxtRConsola = new System.Windows.Forms.RichTextBox();
             this.@__PnlMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.@__PanelSP1)).BeginInit();
             this.@__PanelSP1.Panel1.SuspendLayout();
@@ -98,6 +99,7 @@
             // 
             // __PanelSP1_1.Panel2
             // 
+            this.@__PanelSP1_1.Panel2.Controls.Add(this.@__BtnChangeCs);
             this.@__PanelSP1_1.Panel2.Controls.Add(this.@__BtnCompilar);
             this.@__PanelSP1_1.Size = new System.Drawing.Size(787, 157);
             this.@__PanelSP1_1.SplitterDistance = 125;
@@ -113,6 +115,17 @@
             this.@__TxtRCsFile.Size = new System.Drawing.Size(787, 125);
             this.@__TxtRCsFile.TabIndex = 0;
             this.@__TxtRCsFile.Text = "";
+            // 
+            // __BtnChangeCs
+            // 
+            this.@__BtnChangeCs.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.@__BtnChangeCs.Location = new System.Drawing.Point(754, 4);
+            this.@__BtnChangeCs.Name = "__BtnChangeCs";
+            this.@__BtnChangeCs.Size = new System.Drawing.Size(30, 23);
+            this.@__BtnChangeCs.TabIndex = 2;
+            this.@__BtnChangeCs.Text = "...";
+            this.@__BtnChangeCs.UseVisualStyleBackColor = true;
+            this.@__BtnChangeCs.Click += new System.EventHandler(this.@__BtnChangeCs_Click);
             // 
             // __BtnCompilar
             // 
@@ -140,6 +153,17 @@
             this.@__PanelSP1_2.Size = new System.Drawing.Size(787, 169);
             this.@__PanelSP1_2.SplitterDistance = 392;
             this.@__PanelSP1_2.TabIndex = 0;
+            // 
+            // __TxtRConsola
+            // 
+            this.@__TxtRConsola.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.@__TxtRConsola.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.@__TxtRConsola.Location = new System.Drawing.Point(0, 0);
+            this.@__TxtRConsola.Name = "__TxtRConsola";
+            this.@__TxtRConsola.ReadOnly = true;
+            this.@__TxtRConsola.Size = new System.Drawing.Size(392, 169);
+            this.@__TxtRConsola.TabIndex = 0;
+            this.@__TxtRConsola.Text = "";
             // 
             // __PanelTab1
             // 
@@ -204,17 +228,6 @@
             this.@__DataGVAtributos.Size = new System.Drawing.Size(377, 137);
             this.@__DataGVAtributos.TabIndex = 0;
             // 
-            // __TxtRConsola
-            // 
-            this.@__TxtRConsola.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.@__TxtRConsola.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.@__TxtRConsola.Location = new System.Drawing.Point(0, 0);
-            this.@__TxtRConsola.Name = "__TxtRConsola";
-            this.@__TxtRConsola.ReadOnly = true;
-            this.@__TxtRConsola.Size = new System.Drawing.Size(392, 169);
-            this.@__TxtRConsola.TabIndex = 0;
-            this.@__TxtRConsola.Text = "";
-            // 
             // __FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -263,6 +276,7 @@
         private System.Windows.Forms.DataGridView __DataGVTokens;
         private System.Windows.Forms.DataGridView __DataGVAtributos;
         private System.Windows.Forms.RichTextBox __TxtRConsola;
+        private System.Windows.Forms.Button __BtnChangeCs;
     }
 }
 

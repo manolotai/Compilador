@@ -21,12 +21,11 @@ namespace Compilador.Analizadores.Sintaxis {
         private string _BuffValor;
         private string _BuffNombre;
         private string _BuffAccesor;
-
-        private IDSintaxis _IDSintax;
          
         private TablaAtributos _TblAtrib;
         private Dictionary<string, IDTokens> _PReservadas;
-        private Dictionary<string, Func<double, double, bool>> _OpLogico;
+        private Dictionary<string, Func<bool, bool, bool>> _OpLogico;
+        private Dictionary<string, Func<double, double, bool>> _OpComparacion;
         private Dictionary<string, Dictionary<string, Func<double, double, double>>> _OpAritm;
 
         private List<string> _OutPut;
@@ -48,7 +47,11 @@ namespace Compilador.Analizadores.Sintaxis {
             _LogAtributos = new List<Atributo>();
             _OutPut = new List<string>();
             _PReservadas = new Dictionary<string, IDTokens>();
-            _OpLogico = new Dictionary<string, Func<double, double, bool>>() {
+            _OpLogico = new Dictionary<string, Func<bool, bool, bool>>() {
+                { "||", (x, y) => x || y },
+                { "&&", (x, y) => x && y }
+            };
+            _OpComparacion = new Dictionary<string, Func<double, double, bool>>() {
                 { "<", (x, y) => x < 1 },
                 { ">", (x, y) => x > y },
                 { "==", (x, y) => x == y },
@@ -91,249 +94,13 @@ namespace Compilador.Analizadores.Sintaxis {
             PReservadas(typeof(Atributo.TypeDato), IDTokens.TipoDato);
 
             NextTokenTrue();
-            InitGragoSintaxis();
-        }
-
-        public void AnalizarSintaxis(int idx = 0)
-        {
-            while (!_Texto.EndOfStream) {
-                var nodo = _GrafoSintaxis[idx]; //poner asi en _grafolexico
-                Nodo<NodoSintaxis, string>.Arista? arista; 
-
-                while ((arista = nodo.TryGetPass(_Valor) ??
-                        nodo[_ID.ToString()]).Value.Nodo != null) {
-
-                    arista?.Nodo.Valor.Accion?.Invoke();
-
-                    if (arista.Value.Pass)
-                        arista?.Accion?.Invoke();
-                    nodo = arista?.Nodo;
-                }
-            }
-        }
-
-        private void NewNodo(IDSintaxis valor, int cantidad)
-        {
-            List<int> listaNodos;
-            bool newKey;
-            listaNodos = (newKey = !_ISint.TryGetValue(valor, out listaNodos)) ?
-                new List<int>() { 0 } : listaNodos;
-            for (int i = 0; i < cantidad; i++) {
-                listaNodos.Add(_GrafoSintaxis.Add(new NodoSintaxis(valor)));
-            }
-
-            if (newKey)
-                _ISint.Add(valor, listaNodos);
-        }
-
-        private void Enlazar(int origen, int destino,
-            bool match = false, Action accion = null)
-        {
-            if(accion != null)
-                _GrafoSintaxis[destino].Valor.Accion = accion;
-
-            if(match)
-                _GrafoSintaxis.EnlazarNodos(origen, destino, match, () => Match(_ID));
-            else
-                _GrafoSintaxis.EnlazarNodos(origen, destino, match);
-        }
-
-        private void Enlazar(int origen, int destino, bool? force = false,
-            Action accion = null, params IDTokens[] match)
-        {
-            if (accion != null)
-                _GrafoSintaxis[destino].Valor.Accion = accion;
-
-            if (force == null)
-                foreach (var item in match) {
-                    _GrafoSintaxis.EnlazarNodos(origen, destino, false, () => Match(item), item.ToString());
-                }
-            else {
-                if (force.Value)
-                    foreach (var item in match) {
-                        _GrafoSintaxis.EnlazarNodos(origen, destino, true, () => Match(item));
-                    } 
-                else
-                    foreach (var item in match) {
-                        _GrafoSintaxis.EnlazarNodos(origen, destino, true, () => Match(item), item.ToString());
-                    }
-            }
-        }
-
-        private void Enlazar(int origen, int destino, bool? force = false,
-            Action accion = null, params string[] match)
-        {
-            if (accion != null)
-                _GrafoSintaxis[destino].Valor.Accion = accion;
-
-            if (force == null)
-                foreach (var item in match) {
-                    _GrafoSintaxis.EnlazarNodos(origen, destino, false, () => Match(item), item);
-                } 
-            else {
-                if (force.Value)
-                    foreach (var item in match) {
-                        _GrafoSintaxis.EnlazarNodos(origen, destino, true, () => Match(item));
-                    } 
-                else
-                    foreach (var item in match) {
-                        _GrafoSintaxis.EnlazarNodos(origen, destino, true, () => Match(item), item);
-                    }
-            }
-        }
+        }    
 
         private void PReservadas(Type infoEnum, IDTokens asignToken)
         {
             foreach (var item in Enum.GetNames(infoEnum)) {
                 _PReservadas.Add(item.ToLower(), asignToken);
             }
-        }
-
-        private void NewAtrib()
-        {
-            var atrib = new Atributo(_BuffNombre, Double.Parse(_BuffValor),
-                _BuffTipo, _BuffAccesor);
-            _TblAtrib.Add(atrib);
-            _LogAtributos.Add(atrib);
-            ResetBuffer();
-        }
-
-        private void ResetBuffer()
-        {
-            _BuffValor = "0";
-            _BuffNombre = "";
-            _BuffTipo = "Unknown";
-            _BuffAccesor = "Private";
-        }
-
-        private void InitGragoSintaxis()
-        {
-            var accesores = new string[] { "public", "private", "protected" };
-            var tipos = new string[] { "void", "char", "int", "float", "double" };
-            List<int> i;
-            _GrafoSintaxis.Add();
-            
-            
-            //Incremento
-            NewNodo(IDSintaxis.Incremento, 10);
-            i = _ISint[IDSintaxis.Incremento];
-            //Enlazar(i[1], i[2], match: IDTokens.OpIncremento, accion: () => );
-
-            //Asignacion
-            NewNodo(IDSintaxis.Asignacion, 10);
-            i = _ISint[IDSintaxis.Asignacion];
-            Enlazar(i[1], i[2], match: IDTokens.OpAsignacion);
-            Enlazar(i[2], i[3], accion: () => _BuffValor = "" + Expresion());
-            Enlazar(i[3], i[4], match: IDTokens.FinSentencia, accion: () => NewAtrib());
-            
-            //Declaracion
-            NewNodo(IDSintaxis.Declaracion, 10);
-            i = _ISint[IDSintaxis.Declaracion];
-            Enlazar(i[1], i[2], true, () =>  _BuffTipo = _Valor, tipos );
-            Enlazar(i[2], i[3], true, () => _BuffNombre = _Valor, IDTokens.Identificador);
-            Enlazar(i[3], _ISint[IDSintaxis.Asignacion][1]);
-            Enlazar(i[3], i[4], true, match: IDTokens.FinSentencia);
-
-            //Instruccion
-            NewNodo(IDSintaxis.Instruccion, 20);
-            i = _ISint[IDSintaxis.Instruccion];
-            Enlazar(i[1], _ISint[IDSintaxis.Asignacion][1], null, match: IDTokens.OpAsignacion);
-            Enlazar(i[1], i[2], match: "Console");
-            Enlazar(i[2], i[3], true, match: IDTokens.Punto);
-            Enlazar(i[3], i[4], true, match: "WriteLine");
-            Enlazar(i[3], i[5], match: "Write");
-            Enlazar(i[3], i[6], match: "ReadLine");
-            Enlazar(i[4], i[7], true, match: IDTokens.InitParametros);
-            Enlazar(i[5], i[8], true, match: IDTokens.InitParametros);
-            Enlazar(i[6], i[9], true, match: IDTokens.InitParametros);
-            Enlazar(i[7], i[10], match: IDTokens.Cadena, accion: () => _BuffValor = _Valor);
-            Enlazar(i[8], i[11], match: IDTokens.Cadena, accion: () => _BuffValor = _Valor);
-            Enlazar(i[9], i[12], true, match: IDTokens.FinParametros);
-            Enlazar(i[10], i[13], true, match: IDTokens.FinParametros);
-            Enlazar(i[11], i[14], true, match: IDTokens.FinParametros);
-            Enlazar(i[12], i[15], true, match: IDTokens.FinSentencia, accion: () => Console.ReadLine());
-
-            Enlazar(i[13], i[16], true, match: IDTokens.FinSentencia, accion: () => { Console.WriteLine(_BuffValor); _BuffValor = ""; });
-            Enlazar(i[14], i[17], true, match: IDTokens.FinSentencia, accion: () => { Console.Write(_BuffValor); _BuffValor = ""; });
-
-            //Enlazar(i[1], _ISint[IDSintaxis.Incremento][1], match: IDTokens.OpIncremento);
-            //Enlazar(i[1], _ISint[IDSintaxis.Llamada][1], match: IDTokens.Punto); //Llamada
-
-            //If
-            NewNodo(IDSintaxis.Instruccion, 10);
-            i = _ISint[IDSintaxis.Instruccion];
-            Enlazar(i[1], i[2], match: "if");
-            Enlazar(i[2], i[3], match: IDTokens.InitParametros);
-
-            //InitParametros
-            NewNodo(IDSintaxis.InitParametros, 10);
-            i = _ISint[IDSintaxis.InitParametros];
-            Enlazar(i[1], i[2], true, match: IDTokens.InitParametros, accion: () => _TblAtrib.NewAmbito());
-            Enlazar(i[2], i[3], true, match: IDTokens.FinParametros);
-            Enlazar(i[2], i[4], null, match: IDTokens.TipoDato);
-            Enlazar(i[4], i[5], true, match: IDTokens.TipoDato, accion: () => _BuffTipo = _Valor);
-            Enlazar(i[5], i[6], true, match: IDTokens.Identificador, accion: () => _BuffNombre = _Valor);
-            Enlazar(i[6], i[4], match: IDTokens.Coma, accion: () => NewAtrib());
-            Enlazar(i[6], i[2]);
-
-            //Metodo
-            NewNodo(IDSintaxis.Metodo, 10);
-            i = _ISint[IDSintaxis.Metodo];
-            Enlazar(i[1], _ISint[IDSintaxis.InitParametros][1], null, match: IDTokens.InitParametros);
-            Enlazar(_ISint[IDSintaxis.InitParametros][3], i[2]);
-            Enlazar(i[2], i[3], true, match: IDTokens.InitBloque);
-            Enlazar(i[3], i[4], true, match: IDTokens.FinBloque);
-
-            //Clase
-            NewNodo(IDSintaxis.Clase, 20);
-            i = _ISint[IDSintaxis.Clase];
-            Enlazar(i[1], i[2], match: accesores);
-            Enlazar(i[1], i[3], match: "class");
-            Enlazar(i[2], i[3], true, match: "class");
-            Enlazar(i[3], i[4], true, match: IDTokens.Identificador);
-
-            Enlazar(i[4], i[5], true, match: IDTokens.InitBloque);
-            Enlazar(i[5], i[6], true, match: IDTokens.FinBloque);
-            Enlazar(i[5], i[7], match: IDTokens.Accesor, accion: () => _BuffAccesor = _Valor);
-            Enlazar(i[5], i[8], match: IDTokens.TipoDato, accion: () => _BuffTipo = _Valor);
-            Enlazar(i[5], i[9], match: IDTokens.Identificador, accion: () => _BuffNombre = _Valor); //constructor
-            Enlazar(i[6], i[1]);
-            Enlazar(i[7], i[8], true, match: IDTokens.TipoDato);
-            Enlazar(i[7], i[9], match: IDTokens.Identificador);
-            Enlazar(i[8], i[9], true, match: IDTokens.Identificador);
-
-            //Enlazar(i[8], _ISint[IDSintaxis.Declaracion][2], match: false); // identi puede ser optativo o no
-            Enlazar(i[9], _ISint[IDSintaxis.Metodo][1], null, match: IDTokens.InitParametros);
-            Enlazar(_ISint[IDSintaxis.Metodo][3], i[10], true, match: IDTokens.InitParametros);
-            //Enlazar(i[9], i[10], match: IDTokens.OpAsignacion);
-            //Enlazar(i[9], i[12], true, match: IDTokens.FinSentencia, accion: () => NewAtrib());
-            Enlazar(i[10], i[11], accion: () => _BuffValor = "" + Expresion());//revisar aqui
-            Enlazar(i[11], i[12], true, match: IDTokens.FinSentencia);
-            Enlazar(i[12], i[5]);
-
-
-
-            //Enlazar(i[5], _ISint[IDSintaxis.Metodo][1]);
-            //Enlazar(_ISint[IDSintaxis.Metodo][1], i[6], true, match: IDTokens.FinBloque);
-
-            //NameSpace
-            NewNodo(IDSintaxis.NameSpace, 10);
-            i = _ISint[IDSintaxis.NameSpace];
-            Enlazar(i[0], i[1], match: "NameSpace");
-            Enlazar(i[1], i[2], true, match: IDTokens.Identificador);
-            Enlazar(i[2], i[1], match: IDTokens.Punto);
-            Enlazar(i[2], i[3], true, match: IDTokens.InitBloque);
-            Enlazar(i[3], _ISint[IDSintaxis.Clase][1]);
-            Enlazar(_ISint[IDSintaxis.Clase][1], i[4], true, match: IDTokens.FinBloque);
-
-            //Referencia
-            NewNodo(IDSintaxis.Referencia, 4);
-            i = _ISint[IDSintaxis.Referencia];
-            Enlazar(i[0], i[1], match: "using");
-            Enlazar(i[1], i[2], true, match: IDTokens.Identificador);
-            Enlazar(i[2], i[1], match: IDTokens.Punto);
-            Enlazar(i[2], i[3], true, match: IDTokens.FinSentencia);
-
         }
 
         public void AnalisisSintactico()
@@ -343,6 +110,30 @@ namespace Compilador.Analizadores.Sintaxis {
                 Referencia();
             }
             NameSpace();
+        }
+
+        private void NewAtrib(bool valido)
+        {
+            try {
+                if (valido) {
+                    var atrib = new Atributo(_BuffNombre, Double.Parse(_BuffValor),
+                    _BuffTipo, _BuffAccesor);
+                    _TblAtrib.Add(atrib);
+                    _LogAtributos.Add(atrib);
+                    ResetBuffer();
+                }
+            } catch (FormatException) {
+                throw new FormatException(String.Format("{0} No tiene el formato correspondiente, en la Linea {1}, Columna {2}",
+                        _BuffValor, _Fila, _Columna));
+            }
+        }
+
+        private void ResetBuffer()
+        {
+            _BuffValor = "0";
+            _BuffNombre = "";
+            _BuffTipo = "Unknown";
+            _BuffAccesor = "private";
         }
 
         private void Referencia()
@@ -377,7 +168,7 @@ namespace Compilador.Analizadores.Sintaxis {
             Match(IDTokens.InitBloque);
             
             do {
-                if (IsAndMatch(IDTokens.Accesor, () => _BuffAccesor = _Valor)) {
+                if (IsAndMatch(IDTokens.Accesor)) {
                     if (IsAndMatch(IDTokens.Identificador)) {
                         Metodo();
                         ResetBuffer();
@@ -398,9 +189,9 @@ namespace Compilador.Analizadores.Sintaxis {
 
         private void AtribOrMetodo()
         {
-            _BuffTipo = _Valor;
+            //_BuffTipo = _Valor;
             Match(IDTokens.TipoDato);
-            _BuffNombre = _Valor;
+            //_BuffNombre = _Valor;
             Match(IDTokens.Identificador);
 
             if (_ID == IDTokens.InitParametros) {
@@ -408,7 +199,7 @@ namespace Compilador.Analizadores.Sintaxis {
                 ResetBuffer();
             } else {
                 Match(IDTokens.FinSentencia);
-                NewAtrib();
+                NewAtrib(true);
             }
         }
 
@@ -425,60 +216,49 @@ namespace Compilador.Analizadores.Sintaxis {
                     Match(IDTokens.Identificador);
                     if (IsAndMatch(IDTokens.OpAsignacion))
                         _BuffValor = "" + Expresion();
-                    NewAtrib();
+                    NewAtrib(true);
                     if (!IsAndMatch(IDTokens.Coma))
                         break;
                 } while (true);
             }
             Match(IDTokens.FinParametros);
 
-            Cuerpo();
-
-            //Match(IDTokens.InitBloque);
-            //while (_ID != IDTokens.FinBloque) {
-            //    if (_Valor == "System") {
-            //        WriteConsole();
-            //    }
-            //    switch (_ID) {
-            //        case IDTokens.TipoDato:
-            //            Declaracion();
-            //            break;
-            //        case IDTokens.FinSentencia:
-            //            Match(IDTokens.FinSentencia);
-            //            break;
-            //    }
-            //}
-            //Match(IDTokens.FinBloque);
-            //_TblAtrib.DelAmbito();
+            Cuerpo(true);
         }
 
-        private void Declaracion()
+        private void Declaracion(bool valido)
         {
             var auxTipo = _BuffTipo = _Valor;
             Match(IDTokens.TipoDato);
             do {
                 _BuffNombre = _Valor;
                 Match(IDTokens.Identificador);
-                if (IsAndMatch(IDTokens.OpAsignacion)) 
-                    _BuffValor = "" + Expresion();
+                if (IsAndMatch(IDTokens.OpAsignacion)) {
+                    if (IsAndMatch("Console")) {
+                        Match(IDTokens.Punto);
+                        _BuffValor = ReadConsole(valido);
+                    }
+                    else
+                        _BuffValor = "" + Expresion();
+                }  
 
                 if (IsAndMatch(IDTokens.Coma)) {
-                    NewAtrib();
+                    NewAtrib(valido);
                     _BuffTipo = auxTipo;
                 } else break;
             } while (true);
 
             Match(IDTokens.FinSentencia);
-            NewAtrib();
+            NewAtrib(valido);
         }
 
-        private void Definicion(string auxTipo)
+        private void Definicion(string auxTipo, bool valido)
         {
             do {
                 if (IsAndMatch(IDTokens.OpAsignacion))
                     _BuffValor = "" + Expresion();
                 if (IsAndMatch(IDTokens.Coma)) {
-                    NewAtrib();
+                    NewAtrib(valido);
                     _BuffTipo = auxTipo;
                     _BuffNombre = _Valor;
                     Match(IDTokens.Identificador);
@@ -486,16 +266,12 @@ namespace Compilador.Analizadores.Sintaxis {
             } while (true);
 
             Match(IDTokens.FinSentencia);
-            NewAtrib();
+            NewAtrib(valido);
         }
 
-        private void WriteConsole()
+        private void WriteConsole(bool valido)
         {
             bool isLine = true;
-            Match("System");
-            Match(IDTokens.Punto);
-            Match("Console");
-            Match(IDTokens.Punto);
             if (IsAndMatch("Write"))
                 isLine = false;
             else
@@ -506,54 +282,97 @@ namespace Compilador.Analizadores.Sintaxis {
             } else {
                 _OutPut.Add(_Valor.TrimStart('\"').TrimEnd('\"') + (isLine ? "\n" : ""));
                 Match(IDTokens.Cadena);
-            } 
+            }
+            if (!valido) {
+                if (_OutPut.Count > 0)
+                    _OutPut.RemoveAt(_OutPut.Count - 1);
+            } else {
+                Console.Write(_OutPut.Last());
+            }
+                
             Match(IDTokens.FinParametros);
             Match(IDTokens.FinSentencia);
         }
 
-        public void If()
+        private string ReadConsole(bool valido)
         {
-            if (IsAndMatch("if")) {
-                Match(IDTokens.InitParametros);
-                if (Logica()) {
-                    Match(IDTokens.FinParametros);
+            string read = "";
+            Match("ReadLine");
+            Match(IDTokens.InitParametros);
+            Match(IDTokens.FinParametros);
+            if (valido)
+                read = Console.ReadLine();
+            return read;
+        }
 
-                } else {
-                    Match(IDTokens.FinParametros);
-                    Match(IDTokens.InitBloque);
-                    do {
-                        if (IsAndMatch(IDTokens.FinBloque))
-                            break;
-                    } while (Match(_ID));
-
-
-                }
+        private void While()
+        {
+            var memory = new MemoryStream();
+            var writer = new StreamWriter(memory);
+            
+            if (IsAndMatch("while")) {
+                bool valido = Condicion();
+                Cuerpo(valido);
             }
         }
 
-        private void Cuerpo()
+        private void If(bool valido)
+        {
+            if (IsAndMatch("if")) {
+                bool validar = Condicion();
+                CuerpoOrSentencia(validar && valido);
+                do {
+                    if (IsAndMatch("else")) {
+                        if (IsAndMatch("if")) {
+                            bool validar2 = Condicion();
+                            validar2 = !validar ? (validar = validar2) : false;
+                            CuerpoOrSentencia(validar2 && valido);
+                        } else {
+                            CuerpoOrSentencia(!validar && valido);
+                            break;
+                        }
+                    } else break;
+                } while (true);
+            }
+        }
+
+        private bool Sentencia(bool valido)
+        {
+            if (_ID == IDTokens.TipoDato) {
+                Declaracion(valido);
+            } else if (_Valor == "if") {
+                If(valido);
+            } else if (IsAndMatch("Console")) {
+                Match(IDTokens.Punto);
+                WriteConsole(valido);
+            } else
+                return false;
+            return true;
+        }
+
+        private void Cuerpo(bool valido)
         {
             Match(IDTokens.InitBloque);
             _TblAtrib.NewAmbito();
 
             do {
-                if (_ID == IDTokens.TipoDato) {
-                    Declaracion();
-                } else if (_Valor == "if") {
-                    If();
-                } else if (_Valor == "System") {
-                    WriteConsole();
-                }
-                else break;
+                if(!Sentencia(valido))
+                    break;
             } while (true);
 
             Match(IDTokens.FinBloque);
             _TblAtrib.DelAmbito();
         }
 
-        private void Sentencia()
+        private void CuerpoOrSentencia(bool valido)
         {
-
+            if (_ID == IDTokens.InitBloque)
+                Cuerpo(valido);
+            else {
+                if (!Sentencia(valido))
+                    throw new InvalidDataException(String.Format("Expresion {0} no valida, en la Linea {1}, Columna {2}",
+                        _Valor, _Fila, _Columna));
+            }
         }
 
         private void Incremento(string variable)
@@ -565,14 +384,54 @@ namespace Compilador.Analizadores.Sintaxis {
             Match(IDTokens.OpIncremento);
         }
 
+        //Logica
         private bool Logica()
-        {//falta implementar el uso de !
-            Func<double, double, bool> _Op;
+        {
+            Func<bool, bool, bool> logica;
+            bool booleano = Comparacion();
+            if (_OpLogico.TryGetValue(_Valor, out logica)) {
+                Match(IDTokens.OpLogico);
+                booleano = logica(booleano, Logica());
+            }
+            return booleano;
+        }
+        
+        private bool Comparacion()
+        {
+            switch (_ID) {
+                case IDTokens.InitParametros:
+                case IDTokens.Identificador:
+                case IDTokens.Numero: //añadir + y - para negativos
+                    double num = Expresion();
+                    Func<double, double, bool> compara;
+                    if (!_OpComparacion.TryGetValue(_Valor, out compara))
+                        throw new InvalidDataException(String.Format("Se espera una expresion booleana valida, en la Linea {0}, Columna {1}",
+                            _Fila, _Columna));
+                    Match(IDTokens.OpComparacion);
+                    return compara(num, Expresion());
 
-            double num1 = Expresion();
-            _OpLogico.TryGetValue(_Valor, out _Op);
-            Match(IDTokens.OpLogico);
-            return _Op(num1, Expresion());
+                case IDTokens.Booleano:
+                    if (IsAndMatch("true"))
+                        return true;
+                    else {
+                        Match("false");
+                        return false;
+                    }
+                default:
+                    if(IsAndMatch("!"))
+                        return !Logica(); 
+                    else
+                        throw new InvalidDataException(String.Format("Se espera una expresion booleana valida, en la Linea {0}, Columna {1}",
+                            _Fila, _Columna));
+            }
+        }
+
+        private bool Condicion()
+        {
+            Match(IDTokens.InitParametros);
+            bool booleano = Logica();
+            Match(IDTokens.FinParametros);
+            return booleano;
         }
 
         //Aritmetica
@@ -647,14 +506,6 @@ namespace Compilador.Analizadores.Sintaxis {
                         Match(IDTokens.Numero);
                         return num;
 
-                    case IDTokens.Booleano:
-                        if (IsAndMatch("true"))
-                            return 1;
-                        else {
-                            Match("false");
-                            return 0;
-                        }
-
                     default:
                         throw new InvalidDataException(String.Format("Se espera una expresion valida, en la Linea {0}, Columna {1}",
                             _Fila, _Columna));
@@ -665,14 +516,8 @@ namespace Compilador.Analizadores.Sintaxis {
             }
         }
 
-        //Logica
-        //public bool ExpresionBool()
-        //{
-        //    double expr = Expresion();
-        //}
-
         //Match
-        private void Match(string valor)
+        protected void Match(string valor)
         {
             if(valor == _Valor)
                 NextTokenTrue();
@@ -681,7 +526,7 @@ namespace Compilador.Analizadores.Sintaxis {
                 valor, _Fila, _Columna));
         }
 
-        private bool Match(IDTokens id)
+        protected bool Match(IDTokens id)
         {
             if (id == _ID) {
                 NextTokenTrue();
@@ -692,18 +537,7 @@ namespace Compilador.Analizadores.Sintaxis {
                 id.ToString(), _Fila, _Columna));
         }
 
-        private bool Match(IDSintaxis id)
-        {
-            if (id == _IDSintax) {
-                NextTokenTrue();
-                return true;
-            }
-            else throw new InvalidDataException(
-                String.Format("Se espera {0}, en la Linea {1}, Columna {2}",
-                id.ToString(), _Fila, _Columna));
-        }
-
-        private bool IsAndMatch(IDTokens id, Action doBefore = null)
+        protected bool IsAndMatch(IDTokens id, Action doBefore = null)
         {
             if (_ID == id) {
                 doBefore?.Invoke();
@@ -713,7 +547,7 @@ namespace Compilador.Analizadores.Sintaxis {
             return false;
         }
 
-        private bool IsAndMatch(string valor, Action doBefore = null)
+        protected bool IsAndMatch(string valor, Action doBefore = null)
         {
             if (_Valor == valor) {
                 doBefore?.Invoke();
@@ -723,18 +557,20 @@ namespace Compilador.Analizadores.Sintaxis {
             return false;
         }
 
-        private void NextTokenTrue()
+        protected void NextTokenTrue()
         {
-            bool end;
+            bool noEnd;
             do {
-                end = NextToken();
+                noEnd = NextToken();
                 if (_ID == IDTokens.Identificador) {
                     var temp = _ID;
                     _ID = _PReservadas.TryGetValue(_Valor, out _ID) ?   //evitar _ID = null
                         _ID : temp;
                 }
                 _LogTokens.Add(new Token(_ID, _Valor));
-            } while (_ID == IDTokens.Comentario && end);
+                if (!noEnd)
+                    break;
+            } while (_ID == IDTokens.Comentario);
             
         }
 
