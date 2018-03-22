@@ -182,6 +182,7 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(idx[2], idx[2]);
             Enlazar(idx[2], idx[3], '*');
             Enlazar(idx[3], idx[2]);
+            Enlazar(idx[3], idx[3], '*');
             Enlazar(idx[3], idx[4], '/');
 
             //Cadena

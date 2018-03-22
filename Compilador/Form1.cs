@@ -61,7 +61,7 @@ namespace Compilador {
                 writeStrm.Write(__TxtRCsFile.Text);
             using (var readStrm = new StreamReader(_PathProyect)) {
                 try {
-                    Sintaxis test = new Sintaxis(readStrm);
+                    Lenguaje test = new Lenguaje(readStrm);
                     test.AnalisisSintactico();
 
                     foreach (var item in test.OutPut) {
