@@ -13,6 +13,8 @@ namespace Compilador.Analizadores.Sintaxis {
         
         protected enum Booleanos { True, False }
 
+        protected bool _IsCaptura;
+        protected string _BufferStream;
         protected List<string> _OutPut;
         protected List<Token> _LogTokens;
         protected List<Atributo> _LogAtributos;

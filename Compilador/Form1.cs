@@ -26,6 +26,9 @@ namespace Compilador {
             _PathProyect = _InitPath;
             var listFiles = new DirectoryInfo(_PathProyect).GetFiles("Text.cs");
 
+            int y = (char)(1.5 + 1.5);
+            Console.WriteLine(y);
+
             if(listFiles.Count() == 0) {
                 using (var writeStrm = new StreamWriter(_PathProyect + @"\Text.cs", false, Encoding.ASCII)) {
                     writeStrm.Write("//Archivo Nuevo " + (char)10);

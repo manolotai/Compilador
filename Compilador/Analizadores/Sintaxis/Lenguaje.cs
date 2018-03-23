@@ -10,7 +10,7 @@ namespace Compilador.Analizadores.Sintaxis {
     public class Lenguaje : LogicaAritmetica {
 
         private string _BuffTipo;
-        private string _BuffValor;
+        private Atributo _BuffValor;
         private string _BuffNombre;
         private string _BuffAccesor;
 
@@ -33,21 +33,25 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             try {
                 if (valido) {
-                    var atrib = new Atributo(_BuffNombre, Double.Parse(_BuffValor),
-                    _BuffTipo, _BuffAccesor);
-                    _TblAtrib.Add(atrib);
-                    _LogAtributos.Add(atrib);
-                    ResetBuffer();
+                    if((Atributo.TypeDato)Enum.Parse(typeof(Atributo.TypeDato), _BuffTipo, true) >= _BuffValor.TipoDato) {
+                        var atrib = new Atributo(_BuffNombre, _BuffValor.Valor, 
+                            _BuffTipo, _BuffAccesor);
+                        _TblAtrib.Add(atrib);
+                        _LogAtributos.Add(atrib);
+                        ResetBuffer();
+                    } else
+                        throw new InvalidDataException(String.Format("No se puede asignar {0} a {1}, en la Linea {2}, Columna {3}",
+                        _BuffValor.TipoDato, _BuffTipo, _Fila, _Columna));
                 }
             } catch (FormatException) {
                 throw new FormatException(String.Format("{0} No tiene el formato correspondiente, en la Linea {1}, Columna {2}",
                         _BuffValor, _Fila, _Columna));
-            }
+            } 
         }
 
         private void ResetBuffer()
         {
-            _BuffValor = "0";
+            _BuffValor = new Atributo("", 0, Atributo.TypeDato.Char, "");
             _BuffNombre = "";
             _BuffTipo = "Unknown";
             _BuffAccesor = "private";
@@ -132,7 +136,7 @@ namespace Compilador.Analizadores.Sintaxis {
                     _BuffNombre = _Valor;
                     Match(IDTokens.Identificador);
                     if (IsAndMatch(IDTokens.OpAsignacion))
-                        _BuffValor = "" + Expresion();
+                        _BuffValor = Expresion();
                     NewAtrib(true);
                     if (!IsAndMatch(IDTokens.Coma))
                         break;
@@ -153,9 +157,12 @@ namespace Compilador.Analizadores.Sintaxis {
                 if (IsAndMatch(IDTokens.OpAsignacion)) {
                     if (IsAndMatch("Console")) {
                         Match(IDTokens.Punto);
-                        _BuffValor = ReadConsole(valido);
+                        string aux = ReadConsole(valido);
+                        //if(float.TryParse(aux, )) {
+
+                        //}
                     } else
-                        _BuffValor = "" + _OpAritm["Cast"][_BuffTipo](Expresion(), 0);//cambiar esta linea
+                        _BuffValor = Expresion();
                 }
 
                 if (IsAndMatch(IDTokens.Coma)) {
@@ -172,7 +179,7 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             do {
                 if (IsAndMatch(IDTokens.OpAsignacion))
-                    _BuffValor = "" + Expresion();
+                    _BuffValor = Expresion();
                 if (IsAndMatch(IDTokens.Coma)) {
                     NewAtrib(valido);
                     _BuffTipo = auxTipo;
@@ -299,17 +306,19 @@ namespace Compilador.Analizadores.Sintaxis {
             if (_ID == IDTokens.InitBloque)
                 Cuerpo(valido);
             else {
+                _TblAtrib.NewAmbito();
                 if (!Sentencia(valido))
                     throw new InvalidDataException(String.Format("Expresion {0} no valida, en la Linea {1}, Columna {2}",
                         _Valor, _Fila, _Columna));
+                _TblAtrib.DelAmbito();
             }
         }
 
         private void Incremento(string variable)
         {//solo funcioan en ++ y --
-            Func<double, double, double> incr;
+            Func<Atributo, Atributo, Atributo> incr;
             if (_OpAritm[IDTokens.OpIncremento.ToString()].TryGetValue(_Valor, out incr)) {
-                _TblAtrib[variable].Valor = incr(_TblAtrib[variable].Valor, 0);
+                _TblAtrib[variable] = incr(_TblAtrib[variable], null);
             }
             Match(IDTokens.OpIncremento);
         }
