@@ -50,8 +50,8 @@ namespace Compilador.Analizadores.Sintaxis {
                 { "Cast", new Dictionary<string, Func<Atributo, Atributo, Atributo>>() {
                     { "char", (x, y) => { var p = (x - x % 1) % 256; p.TipoDato = Atributo.TypeDato.Char; return p; } },
                     { "int", (x, y) => { var p = (x - x % 1) % 655366; p.TipoDato = Atributo.TypeDato.Int; return p; } },
-                    { "float", (x, y) => { var p = x % 4294967296; p.TipoDato = Atributo.TypeDato.Int; return p; } }
-                } },
+                    { "float", (x, y) => { var p = x % 4294967296; p.TipoDato = Atributo.TypeDato.Float; return p; } }
+                } }
             };
         }
 
@@ -75,7 +75,6 @@ namespace Compilador.Analizadores.Sintaxis {
 
                 case IDTokens.Identificador:
                 case IDTokens.Numero: //añadir + y - para negativos //resolver distincion () para logica y Expresion()
-                    //double num = Expresion();
                     Atributo atrib = Expresion();
                     Func<double, double, bool> compara;
                     if (!_OpComparacion.TryGetValue(_Valor, out compara))
@@ -98,7 +97,7 @@ namespace Compilador.Analizadores.Sintaxis {
                         else if(_ID == IDTokens.Booleano)
                             return !Comparacion();
                         else
-                            throw new InvalidDataException(String.Format("El operador ! no se peude aplicar a {0}, en la Linea {1}, Columna {2}",
+                            throw new InvalidDataException(String.Format("El operador ! no se puede aplicar a {0}, en la Linea {1}, Columna {2}",
                             _ID, _Fila, _Columna));
                     }
                     else
@@ -120,12 +119,10 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             Func<Atributo, Atributo, Atributo> op;
             Atributo atrib = Termino();
-            //double num = Termino();
 
             if (_OpAritm[IDTokens.OpTermino.ToString()].TryGetValue(_Valor, out op)) {
                 Match(IDTokens.OpTermino);
                 atrib = op(atrib, Expresion());
-                //num = op(num, Expresion());
             }
             return atrib;
         }
@@ -134,12 +131,10 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             Func<Atributo, Atributo, Atributo> op;
             Atributo atrib = Factor();
-            //double num = Factor();
 
             if (_OpAritm[IDTokens.OpFactor.ToString()].TryGetValue(_Valor, out op)) {
                 Match(IDTokens.OpFactor);
                 atrib = op(atrib, Termino());
-                //num = op(num, Termino());
             }
             return atrib;
         }
@@ -148,12 +143,10 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             Func<Atributo, Atributo, Atributo> op;
             Atributo atrib = Potencia();
-            //double num = Potencia();
 
             while (_OpAritm[IDTokens.OpPotencia.ToString()].TryGetValue(_Valor, out op)) {
                 Match(IDTokens.OpPotencia);
                 atrib = op(atrib, Potencia());
-                //num = op(num, Potencia());
             }
             return atrib;
         }
@@ -170,25 +163,18 @@ namespace Compilador.Analizadores.Sintaxis {
                             Match(_ID);
                             Match(IDTokens.FinParametros);
                             atrib = _OpAritm["Cast"][tipo](Potencia(), null);
-                            //num = _OpAritm["Cast"][tipo](Potencia(), 0);
 
                         } else {
-                            //num = Expresion();
                             atrib = Expresion();
                             Match(IDTokens.FinParametros);
                         }
 
                         return atrib;
-                        //return num;
 
                     case IDTokens.Identificador:
                         atrib = _TblAtrib[_Valor];
                         Match(IDTokens.Identificador);
                         return atrib;
-
-                    //num = _TblAtrib[_Valor].Valor;
-                    //Match(IDTokens.Identificador);
-                    //return num;
 
                     //case IDTokens.OpTermino:
                     //    string signo = _Valor;
@@ -204,10 +190,6 @@ namespace Compilador.Analizadores.Sintaxis {
 
                         Match(IDTokens.Numero);
                         return atrib;
-                    //num = double.Parse(_Valor);
-
-                    //Match(IDTokens.Numero);
-                    //return num;
 
                     default:
                         throw new InvalidDataException(String.Format("Se espera una expresion valida, en la Linea {0}, Columna {1}",

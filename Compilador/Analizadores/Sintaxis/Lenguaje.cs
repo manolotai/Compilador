@@ -352,7 +352,7 @@ namespace Compilador.Analizadores.Sintaxis {
             Func<Atributo, Atributo, Atributo> incr = null;
             if (valido) {
                 if (_OpAritm[IDTokens.OpIncremento.ToString()].TryGetValue(_Valor, out incr)) {
-                    //_TblAtrib[variable].Valor = incr(_TblAtrib[variable], null).Valor;
+                    //_TblAtrib[variable].Valor = incr(_TblAtrib[variable], null).Valor;//Revisar despues uso practico o eliminacion
                 }
             }
             Match(IDTokens.OpIncremento);
