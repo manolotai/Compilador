@@ -18,7 +18,7 @@ namespace Compilador.Analizadores.Sintaxis {
                 { "&&", (x, y) => x && y }
             };
             _OpComparacion = new Dictionary<string, Func<double, double, bool>>() {
-                { "<", (x, y) => x < 1 },
+                { "<", (x, y) => x < y },
                 { ">", (x, y) => x > y },
                 { "==", (x, y) => x == y },
                 { "<=", (x, y) => x <= y },
@@ -40,7 +40,7 @@ namespace Compilador.Analizadores.Sintaxis {
                     //{ "!^", (x, y) => Math.Pow(x, 1 / y) }
                 } },
                 { IDTokens.OpIncremento.ToString(), new Dictionary<string, Func<Atributo, Atributo, Atributo>>() {
-                    { "++", (x, y) => x + 1 },
+                    { "++", (x, y) => { return (x + 1); } },
                     { "--", (x, y) => x - 1 },
                     { "+=", (x, y) => x + y },
                     { "-=", (x, y) => x - y },
@@ -161,7 +161,6 @@ namespace Compilador.Analizadores.Sintaxis {
         protected Atributo Potencia()
         {
             try {
-                double num;
                 Atributo atrib;
                 switch (_ID) {
                     case IDTokens.InitParametros:

@@ -26,10 +26,8 @@ namespace Compilador {
             _PathProyect = _InitPath;
             var listFiles = new DirectoryInfo(_PathProyect).GetFiles("Text.cs");
 
-            int y = (char)(1.5 + 1.5);
-            Console.WriteLine(y);
 
-            if(listFiles.Count() == 0) {
+            if (listFiles.Count() == 0) {
                 using (var writeStrm = new StreamWriter(_PathProyect + @"\Text.cs", false, Encoding.ASCII)) {
                     writeStrm.Write("//Archivo Nuevo " + (char)10);
                 }
@@ -60,10 +58,12 @@ namespace Compilador {
             __TxtRConsola.Text = "";
             _TablaTokens.Clear();
             _TablaAtributos.Clear();
+            //FileStream(_PathProyect, FileMode.Open, FileAccess.Read)
             using (var writeStrm = new StreamWriter(_PathProyect, false, Encoding.ASCII))
                 writeStrm.Write(__TxtRCsFile.Text);
             using (var readStrm = new StreamReader(_PathProyect)) {
                 try {
+
                     Lenguaje test = new Lenguaje(readStrm);
                     test.AnalisisSintactico();
 

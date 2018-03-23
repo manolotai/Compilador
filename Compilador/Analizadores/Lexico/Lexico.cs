@@ -21,16 +21,22 @@ namespace Compilador.Analizadores.Lexico {
             Booleano, TipoDato, Accesor, Instruccion, Unknown, Error
         }
 
+        protected bool _IsRepeat;
         protected int _Fila;
         protected int _Columna;
+        protected int _ActPosicion;
+        protected int _PenPosicion;
         protected StreamReader _Texto;
         private Grafo<IDTokens, char> _GrafoTokens;
         private Dictionary<IDTokens, List<int>> _NodosLex;
 
         public Lexico(StreamReader texto)
         {
+            _IsRepeat = false;
             _Fila = 1;
             _Columna = 0;
+            _ActPosicion = 0;
+            _PenPosicion = 0;
             _Texto = texto;
             _GrafoTokens = new Grafo<IDTokens, char>();
             _NodosLex = new Dictionary<IDTokens, List<int>>();
@@ -47,12 +53,19 @@ namespace Compilador.Analizadores.Lexico {
 
             while ((nodo = (arista = nodo[(char)_Texto.Peek()]).Nodo) != null && !_Texto.EndOfStream) {
                 if ((c = (char)_Texto.Read()) == (char)10) {
-                    _Fila++;
-                    _Columna = -1;
+                    if (!_IsRepeat) {
+                        _Fila++;
+                        _Columna = -1;
+                    }
                 }
                 if (arista.Pass)
                     _Valor += c;
-                _Columna++;
+
+                if (!_IsRepeat) {
+                    _Columna++;
+                    _ActPosicion++;
+                }
+                    
                 _ID = nodo.Valor;
             }
 

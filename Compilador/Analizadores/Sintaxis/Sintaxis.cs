@@ -13,8 +13,6 @@ namespace Compilador.Analizadores.Sintaxis {
         
         protected enum Booleanos { True, False }
 
-        protected bool _IsCaptura;
-        protected string _BufferStream;
         protected List<string> _OutPut;
         protected List<Token> _LogTokens;
         protected List<Atributo> _LogAtributos;
@@ -45,18 +43,18 @@ namespace Compilador.Analizadores.Sintaxis {
         //Match
         protected void Match(string valor)
         {
-            if(valor == _Valor)
+            if(valor == _Valor) {
                 NextTokenTrue();
+            }
             else throw new InvalidDataException(
                 String.Format("Se espera '{0}', en la Linea {1}, Columna {2}",
                 valor, _Fila, _Columna));
         }
 
-        protected bool Match(IDTokens id)
+        protected void Match(IDTokens id)
         {
             if (id == _ID) {
                 NextTokenTrue();
-                return true;
             }
             else throw new InvalidDataException(
                 String.Format("Se espera {0}, en la Linea {1}, Columna {2}",  
@@ -87,6 +85,9 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             bool noEnd;
             do {
+                if (!_IsRepeat) {
+                    _PenPosicion = _ActPosicion;
+                }
                 noEnd = NextToken();
                 if (_ID == IDTokens.Identificador) {
                     var temp = _ID;

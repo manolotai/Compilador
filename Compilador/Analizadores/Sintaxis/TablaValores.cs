@@ -51,7 +51,14 @@ namespace Compilador.Analizadores.Sintaxis {
                 return atrib;
             }
 
-            set { this[idx] = value; }
+            set {
+                Atributo atrib = null;
+                TablaAtributos thisTbl = this;
+                do {
+                    if (thisTbl._Atributos.TryGetValue(idx, out atrib))
+                        atrib = value;
+                } while ((thisTbl = thisTbl._NextAmbito) != null);
+            }
         }
     }
 }

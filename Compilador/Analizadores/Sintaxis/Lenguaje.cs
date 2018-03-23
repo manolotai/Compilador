@@ -157,10 +157,12 @@ namespace Compilador.Analizadores.Sintaxis {
                 if (IsAndMatch(IDTokens.OpAsignacion)) {
                     if (IsAndMatch("Console")) {
                         Match(IDTokens.Punto);
+                        int auxInt;
                         string aux = ReadConsole(valido);
-                        //if(float.TryParse(aux, )) {
-
-                        //}
+                        if (Int32.TryParse(aux, out auxInt))
+                            _BuffValor = new Atributo("", auxInt, Atributo.TypeDato.Int, "");
+                        else
+                            _BuffValor = new Atributo("", float.Parse(aux), Atributo.TypeDato.Float, "");
                     } else
                         _BuffValor = Expresion();
                 }
@@ -171,7 +173,6 @@ namespace Compilador.Analizadores.Sintaxis {
                 } else break;
             } while (true);
 
-            Match(IDTokens.FinSentencia);
             NewAtrib(valido);
         }
 
@@ -201,7 +202,7 @@ namespace Compilador.Analizadores.Sintaxis {
                 Match("WriteLine");
             Match(IDTokens.InitParametros);
             if (_ID == IDTokens.Numero || _ID == IDTokens.Identificador) {
-                _OutPut.Add("" + Expresion() + (isLine ? "\n" : ""));
+                _OutPut.Add("" + Expresion().Valor + (isLine ? "\n" : ""));
             } else {
                 _OutPut.Add(_Valor.TrimStart('\"').TrimEnd('\"') + (isLine ? "\n" : ""));
                 Match(IDTokens.Cadena);
@@ -230,21 +231,50 @@ namespace Compilador.Analizadores.Sintaxis {
 
         private void For(bool valido)
         {
-            if (IsAndMatch("For")) {
+            if (IsAndMatch("for")) {
+                int posCond;
+                Func<Atributo, Atributo, Atributo> incr = null;
                 _TblAtrib.NewAmbito();
+
+                Match(IDTokens.InitParametros);
                 Declaracion(valido);
+                posCond = _ActPosicion;
+                Match(IDTokens.FinSentencia);
+
                 bool ciclo = Logica();
                 Match(IDTokens.FinSentencia);
-                _BuffNombre = _Valor;
-                Match("Console");
-                Match(IDTokens.Punto);
-                if (_Valor == "Write" || _Valor == "WriteLine") {
-                    WriteConsole(valido);
-                } else {
-                    ReadConsole(valido);
-                    Match(IDTokens.FinSentencia);
-                }
+                string vIncr = _Valor;
+                Match(IDTokens.Identificador);
+                incr = Incremento(vIncr, true);
+                Match(IDTokens.FinParametros);
+
+                do {
+                    CuerpoOrSentencia(ciclo && valido);
+
+                    if (!_IsRepeat) {
+                        _IsRepeat = true;
+                    }
+
+                    if (ciclo) {
+                        _Texto.DiscardBufferedData();
+                        _Texto.BaseStream.Position = posCond;
+
+                        NextTokenTrue();
+                        _TblAtrib[vIncr].Valor = incr(_TblAtrib[vIncr], null).Valor;
+                        ciclo = Logica();
+                        Match(IDTokens.FinSentencia);
+                        Match(IDTokens.Identificador);
+                        Incremento(vIncr, true);
+                        Match(IDTokens.FinParametros);
+                    }
+                    
+                } while (ciclo);
+                _Texto.DiscardBufferedData();
+                _Texto.BaseStream.Position = _PenPosicion;
+                NextTokenTrue();
+                _IsRepeat = false;
                 _TblAtrib.DelAmbito();
+
             }
         }
 
@@ -272,8 +302,11 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             if (_ID == IDTokens.TipoDato) {
                 Declaracion(valido);
+                Match(IDTokens.FinSentencia);
             } else if (_Valor == "if") {
                 If(valido);
+            } else if (_Valor == "for") {
+                For(valido);
             } else if (IsAndMatch("Console")) {
                 Match(IDTokens.Punto);
                 if (_Valor == "Write" || _Valor == "WriteLine") {
@@ -314,13 +347,16 @@ namespace Compilador.Analizadores.Sintaxis {
             }
         }
 
-        private void Incremento(string variable)
+        private Func<Atributo, Atributo, Atributo> Incremento(string variable, bool valido)
         {//solo funcioan en ++ y --
-            Func<Atributo, Atributo, Atributo> incr;
-            if (_OpAritm[IDTokens.OpIncremento.ToString()].TryGetValue(_Valor, out incr)) {
-                _TblAtrib[variable] = incr(_TblAtrib[variable], null);
+            Func<Atributo, Atributo, Atributo> incr = null;
+            if (valido) {
+                if (_OpAritm[IDTokens.OpIncremento.ToString()].TryGetValue(_Valor, out incr)) {
+                    //_TblAtrib[variable].Valor = incr(_TblAtrib[variable], null).Valor;
+                }
             }
             Match(IDTokens.OpIncremento);
+            return incr;
         }
     }
 }
