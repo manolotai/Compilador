@@ -41,27 +41,29 @@ namespace Compilador.Analizadores.Sintaxis {
         }
 
         //Match
-        protected void Match(string valor)
+        protected string Match(string valor)
         {
             if(valor == _Valor) {
                 NextTokenTrue();
+                return valor;
             }
             else throw new InvalidDataException(
                 String.Format("Se espera '{0}', en la Linea {1}, Columna {2}",
                 valor, _Fila, _Columna));
         }
 
-        protected void Match(IDTokens id)
+        protected IDTokens Match(IDTokens id)
         {
             if (id == _ID) {
                 NextTokenTrue();
+                return id;
             }
             else throw new InvalidDataException(
                 String.Format("Se espera {0}, en la Linea {1}, Columna {2}",  
                 id.ToString(), _Fila, _Columna));
         }
 
-        protected bool IsAndMatch(IDTokens id, Action doBefore = null)
+        protected bool IsMatch(IDTokens id, Action doBefore = null)
         {
             if (_ID == id) {
                 doBefore?.Invoke();
@@ -71,7 +73,7 @@ namespace Compilador.Analizadores.Sintaxis {
             return false;
         }
 
-        protected bool IsAndMatch(string valor, Action doBefore = null)
+        protected bool IsMatch(string valor, Action doBefore = null)
         {
             if (_Valor == valor) {
                 doBefore?.Invoke();

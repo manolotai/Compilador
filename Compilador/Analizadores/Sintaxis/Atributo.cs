@@ -83,5 +83,10 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             return new Atributo("", x.Valor % y, x.TipoDato, "");
         }
+
+        //public static Atributo operator ^(Atributo x, double y)
+        //{
+        //    return new Atributo("", x.Valor % y, x.TipoDato, "");
+        //}
     }
 }

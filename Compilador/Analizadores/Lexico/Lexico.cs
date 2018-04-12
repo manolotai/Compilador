@@ -15,7 +15,7 @@ namespace Compilador.Analizadores.Lexico {
         static private char[] Letras = LetrasMayus.Concat(LetrasMinus).ToArray();
         static private char[] LetrasNumeros = Letras.Concat(Numeros).ToArray();
         public enum IDTokens {
-            Blanco, Identificador, Numero, OpTermino, OpFactor, OpPotencia, OpAsignacion,
+            Blanco, Identificador, NumeroInt, NumeroFlt, OpTermino, OpFactor, OpPotencia, OpAsignacion,
             OpIncremento, OpLogico, OpComparacion, InitParametros, FinParametros, InitBloque,
             FinBloque, Cadena, Caracter, Comentario, FinSentencia, Punto, Coma,
             Booleano, TipoDato, Accesor, Instruccion, Unknown, Error
@@ -104,153 +104,172 @@ namespace Compilador.Analizadores.Lexico {
 
         private void StartGrafoTokens()
         {
-            List<int> idx;
+            List<int> i;
             _GrafoTokens.Add(IDTokens.Blanco);
 
             //Inicio del grafo, nodo 0
             NewNodo(IDTokens.Blanco, 0);
-            idx = _NodosLex[IDTokens.Blanco];
-            Enlazar(idx[0], idx[0], false, (char)9, (char)10, (char)32);
+            i = _NodosLex[IDTokens.Blanco];
+            Enlazar(i[0], i[0], false, (char)9, (char)10, (char)32);
 
             //ErrorLexico
             NewNodo(IDTokens.Error, 3);
 
             //Identificador
             NewNodo(IDTokens.Identificador, 1);
-            idx = _NodosLex[IDTokens.Identificador];
-            Enlazar(idx[0], idx[1], Letras);
-            Enlazar(idx[1], idx[1], LetrasNumeros);
+            i = _NodosLex[IDTokens.Identificador];
+            Enlazar(i[0], i[1], Letras);
+            Enlazar(i[1], i[1], LetrasNumeros);
 
             //OpTerminos
             NewNodo(IDTokens.OpTermino, 2);
-            idx = _NodosLex[IDTokens.OpTermino];
-            Enlazar(idx[0], idx[1], '+');
-            Enlazar(idx[0], idx[2], '-');
+            i = _NodosLex[IDTokens.OpTermino];
+            Enlazar(i[0], i[1], '+');
+            Enlazar(i[0], i[2], '-');
 
-            //Numero
-            NewNodo(IDTokens.Numero, 3);
-            idx = _NodosLex[IDTokens.Numero];
-            Enlazar(idx[0], idx[1], Numeros);
-            Enlazar(idx[1], idx[1], Numeros);
-            Enlazar(idx[1], _NodosLex[IDTokens.Error][1], '.');
-            Enlazar(_NodosLex[IDTokens.Error][1], idx[2], Numeros);
-            Enlazar(idx[2], idx[2], Numeros);
-            Enlazar(idx[1], _NodosLex[IDTokens.Error][2], 'e');
-            Enlazar(idx[2], _NodosLex[IDTokens.Error][2], 'e');
+            ////NumeroInt
+            //NewNodo(IDTokens.NumeroInt, 3);
+            //i = _NodosLex[IDTokens.NumeroInt];
+            //Enlazar(i[0], i[1], Numeros);
+            //Enlazar(i[1], i[1], Numeros);
+            //Enlazar(i[1], _NodosLex[IDTokens.Error][1], '.');
+            //Enlazar(_NodosLex[IDTokens.Error][1], i[2], Numeros);
+            //Enlazar(i[2], i[2], Numeros);
+            //Enlazar(i[1], _NodosLex[IDTokens.Error][2], 'e');
+            //Enlazar(i[2], _NodosLex[IDTokens.Error][2], 'e');
+            //Enlazar(_NodosLex[IDTokens.Error][2], _NodosLex[IDTokens.Error][3], '+', '-');
+            //Enlazar(_NodosLex[IDTokens.Error][2], i[3], Numeros);
+            //Enlazar(_NodosLex[IDTokens.Error][3], i[3], Numeros);
+            //Enlazar(i[3], i[3], Numeros);
+            
+            //NumerosInt
+            NewNodo(IDTokens.NumeroInt, 1);
+            i = _NodosLex[IDTokens.NumeroInt];
+            Enlazar(i[0], i[1], Numeros);
+            Enlazar(i[1], i[1], Numeros);
+            Enlazar(i[1], _NodosLex[IDTokens.Error][1], '.');
+            Enlazar(i[1], _NodosLex[IDTokens.Error][2], 'e');
+
+            //NUmeroFlt
+            NewNodo(IDTokens.NumeroInt, 2);
+            i = _NodosLex[IDTokens.NumeroFlt];
+            Enlazar(_NodosLex[IDTokens.Error][1], i[1], Numeros);
+            Enlazar(i[1], i[1], Numeros);
+            Enlazar(i[1], _NodosLex[IDTokens.Error][2], 'e');
             Enlazar(_NodosLex[IDTokens.Error][2], _NodosLex[IDTokens.Error][3], '+', '-');
-            Enlazar(_NodosLex[IDTokens.Error][2], idx[3], Numeros);
-            Enlazar(_NodosLex[IDTokens.Error][3], idx[3], Numeros);
-            Enlazar(idx[3], idx[3], Numeros);
+            Enlazar(_NodosLex[IDTokens.Error][2], i[2], Numeros);
+            Enlazar(_NodosLex[IDTokens.Error][3], i[2], Numeros);
+            Enlazar(i[2], i[2], Numeros);
 
             //OpFactores
             NewNodo(IDTokens.OpFactor, 3);
-            idx = _NodosLex[IDTokens.OpFactor];
-            Enlazar(idx[0], idx[1], '*');
-            Enlazar(idx[0], idx[2], '/');
-            Enlazar(idx[0], idx[3], '%');
+            i = _NodosLex[IDTokens.OpFactor];
+            Enlazar(i[0], i[1], '*');
+            Enlazar(i[0], i[2], '/');
+            Enlazar(i[0], i[3], '%');
 
             //OpPotencia
             NewNodo(IDTokens.OpPotencia, 2);
-            idx = _NodosLex[IDTokens.OpPotencia];
-            Enlazar(idx[0], idx[1], '^');
-            Enlazar(idx[1], idx[2], '!');
+            i = _NodosLex[IDTokens.OpPotencia];
+            Enlazar(i[0], i[1], '^');
+            Enlazar(i[1], i[2], '!');
 
             //OpAsignacion
             NewNodo(IDTokens.OpAsignacion, 1);
-            idx = _NodosLex[IDTokens.OpAsignacion];
-            Enlazar(idx[0], idx[1], '=');
+            i = _NodosLex[IDTokens.OpAsignacion];
+            Enlazar(i[0], i[1], '=');
 
             //OpIncremento
             NewNodo(IDTokens.OpIncremento, 1);
-            idx = _NodosLex[IDTokens.OpIncremento];
-            Enlazar(_NodosLex[IDTokens.OpTermino][1], idx[1], '+', '=');
-            Enlazar(_NodosLex[IDTokens.OpTermino][2], idx[1], '-', '=');
-            Enlazar(_NodosLex[IDTokens.OpFactor][1], idx[1], '=');
-            Enlazar(_NodosLex[IDTokens.OpFactor][2], idx[1], '=');
+            i = _NodosLex[IDTokens.OpIncremento];
+            Enlazar(_NodosLex[IDTokens.OpTermino][1], i[1], '+', '=');
+            Enlazar(_NodosLex[IDTokens.OpTermino][2], i[1], '-', '=');
+            Enlazar(_NodosLex[IDTokens.OpFactor][1], i[1], '=');
+            Enlazar(_NodosLex[IDTokens.OpFactor][2], i[1], '=');
 
             //OpLogico
             NewNodo(IDTokens.OpLogico, 3);
-            idx = _NodosLex[IDTokens.OpLogico];
-            Enlazar(idx[0], idx[1], '&');
-            Enlazar(idx[0], idx[2], '|');
-            Enlazar(idx[0], idx[3], '!');
-            Enlazar(idx[1], idx[3], '&');
-            Enlazar(idx[2], idx[3], '|');
+            i = _NodosLex[IDTokens.OpLogico];
+            Enlazar(i[0], i[1], '&');
+            Enlazar(i[0], i[2], '|');
+            Enlazar(i[0], i[3], '!');
+            Enlazar(i[1], i[3], '&');
+            Enlazar(i[2], i[3], '|');
 
             //OpComparacion
             NewNodo(IDTokens.OpComparacion, 2);
-            idx = _NodosLex[IDTokens.OpComparacion];
-            Enlazar(idx[0], idx[1], '>', '<');
-            Enlazar(idx[1], idx[2], '=');
-            Enlazar(_NodosLex[IDTokens.OpLogico][3], idx[2], '=');
-            Enlazar(_NodosLex[IDTokens.OpAsignacion][1], idx[2], '=');
+            i = _NodosLex[IDTokens.OpComparacion];
+            Enlazar(i[0], i[1], '>', '<');
+            Enlazar(i[1], i[2], '=');
+            Enlazar(_NodosLex[IDTokens.OpLogico][3], i[2], '=');
+            Enlazar(_NodosLex[IDTokens.OpAsignacion][1], i[2], '=');
 
             //Comentario
             NewNodo(IDTokens.Comentario, 4);
-            idx = _NodosLex[IDTokens.Comentario];
-            Enlazar(_NodosLex[IDTokens.OpFactor][2], idx[1], '/');
-            Enlazar(idx[1], idx[1]);
-            Enlazar(idx[1], idx[4], false, (char)10);
-            Enlazar(_NodosLex[IDTokens.OpFactor][2], idx[2], '*');
-            Enlazar(idx[2], idx[2]);
-            Enlazar(idx[2], idx[3], '*');
-            Enlazar(idx[3], idx[2]);
-            Enlazar(idx[3], idx[3], '*');
-            Enlazar(idx[3], idx[4], '/');
+            i = _NodosLex[IDTokens.Comentario];
+            Enlazar(_NodosLex[IDTokens.OpFactor][2], i[1], '/');
+            Enlazar(i[1], i[1]);
+            Enlazar(i[1], i[4], false, (char)10);
+            Enlazar(_NodosLex[IDTokens.OpFactor][2], i[2], '*');
+            Enlazar(i[2], i[2]);
+            Enlazar(i[2], i[3], '*');
+            Enlazar(i[3], i[2]);
+            Enlazar(i[3], i[3], '*');
+            Enlazar(i[3], i[4], '/');
 
             //Cadena
             NewNodo(IDTokens.Cadena, 2);
-            idx = _NodosLex[IDTokens.Cadena];
-            Enlazar(idx[0], idx[1], '"');
-            Enlazar(idx[1], idx[1]);
-            Enlazar(idx[1], idx[2], '"');
+            i = _NodosLex[IDTokens.Cadena];
+            Enlazar(i[0], i[1], '"');
+            Enlazar(i[1], i[1]);
+            Enlazar(i[1], i[2], '"');
 
             //Caracter
             NewNodo(IDTokens.Caracter, 2);
-            idx = _NodosLex[IDTokens.Caracter];
-            Enlazar(idx[0], idx[1], '\'');
-            Enlazar(idx[1], idx[1]);
-            Enlazar(idx[1], idx[2], '\'');
+            i = _NodosLex[IDTokens.Caracter];
+            Enlazar(i[0], i[1], '\'');
+            Enlazar(i[1], i[1]);
+            Enlazar(i[1], i[2], '\'');
 
             //InicioParametros
             NewNodo(IDTokens.InitParametros, 1);
-            idx = _NodosLex[IDTokens.InitParametros];
-            Enlazar(idx[0], idx[1], '(');
+            i = _NodosLex[IDTokens.InitParametros];
+            Enlazar(i[0], i[1], '(');
 
             //FinParametros
             NewNodo(IDTokens.FinParametros, 1);
-            idx = _NodosLex[IDTokens.FinParametros];
-            Enlazar(idx[0], idx[1], ')');
+            i = _NodosLex[IDTokens.FinParametros];
+            Enlazar(i[0], i[1], ')');
 
             //InicioBloque
             NewNodo(IDTokens.InitBloque, 1);
-            idx = _NodosLex[IDTokens.InitBloque];
-            Enlazar(idx[0], idx[1], '{');
+            i = _NodosLex[IDTokens.InitBloque];
+            Enlazar(i[0], i[1], '{');
 
             //FinBloque
             NewNodo(IDTokens.FinBloque, 1);
-            idx = _NodosLex[IDTokens.FinBloque];
-            Enlazar(idx[0], idx[1], '}');
+            i = _NodosLex[IDTokens.FinBloque];
+            Enlazar(i[0], i[1], '}');
 
             //FinSentencia
             NewNodo(IDTokens.FinSentencia, 1);
-            idx = _NodosLex[IDTokens.FinSentencia];
-            Enlazar(idx[0], idx[1], ';');
+            i = _NodosLex[IDTokens.FinSentencia];
+            Enlazar(i[0], i[1], ';');
 
             //Punto
             NewNodo(IDTokens.Punto, 1);
-            idx = _NodosLex[IDTokens.Punto];
-            Enlazar(idx[0], idx[1], '.');
+            i = _NodosLex[IDTokens.Punto];
+            Enlazar(i[0], i[1], '.');
 
             //Coma
             NewNodo(IDTokens.Coma, 1);
-            idx = _NodosLex[IDTokens.Coma];
-            Enlazar(idx[0], idx[1], ',');
+            i = _NodosLex[IDTokens.Coma];
+            Enlazar(i[0], i[1], ',');
 
             //Unknown
             NewNodo(IDTokens.Unknown, 1);
-            idx = _NodosLex[IDTokens.Unknown];
-            Enlazar(idx[0], idx[1]);
+            i = _NodosLex[IDTokens.Unknown];
+            Enlazar(i[0], i[1]);
         }
     }
 }

@@ -74,7 +74,7 @@ namespace Compilador.Analizadores.Sintaxis {
                     return Condicion();
 
                 case IDTokens.Identificador:
-                case IDTokens.Numero: //añadir + y - para negativos //resolver distincion () para logica y Expresion()
+                case IDTokens.NumeroInt: //añadir + y - para negativos //resolver distincion () para logica y Expresion()
                     Atributo atrib = Expresion();
                     Func<double, double, bool> compara;
                     if (!_OpComparacion.TryGetValue(_Valor, out compara))
@@ -84,14 +84,14 @@ namespace Compilador.Analizadores.Sintaxis {
                     return compara(atrib.Valor, Expresion().Valor);
 
                 case IDTokens.Booleano:
-                    if (IsAndMatch("true"))
+                    if (IsMatch("true"))
                         return true;
                     else {
                         Match("false");
                         return false;
                     }
                 default:
-                    if (IsAndMatch("!")) {
+                    if (IsMatch("!")) {
                         if (_ID == IDTokens.InitParametros)
                             return !Condicion();
                         else if(_ID == IDTokens.Booleano)
@@ -117,36 +117,29 @@ namespace Compilador.Analizadores.Sintaxis {
         //Aritmetica
         protected Atributo Expresion()
         {
-            Func<Atributo, Atributo, Atributo> op;
             Atributo atrib = Termino();
 
-            if (_OpAritm[IDTokens.OpTermino.ToString()].TryGetValue(_Valor, out op)) {
-                Match(IDTokens.OpTermino);
-                atrib = op(atrib, Expresion());
-            }
+            if (_ID == IDTokens.OpTermino)
+                atrib = _OpAritm[_ID.ToString()][Match(_Valor)](atrib, Expresion());
             return atrib;
         }
 
         protected Atributo Termino()
         {
-            Func<Atributo, Atributo, Atributo> op;
             Atributo atrib = Factor();
 
-            if (_OpAritm[IDTokens.OpFactor.ToString()].TryGetValue(_Valor, out op)) {
-                Match(IDTokens.OpFactor);
-                atrib = op(atrib, Termino());
-            }
+            if(_ID == IDTokens.OpFactor)
+                atrib = _OpAritm[_ID.ToString()][Match(_Valor)](atrib, Termino());
             return atrib;
         }
 
         protected Atributo Factor()
         {
-            Func<Atributo, Atributo, Atributo> op;
             Atributo atrib = Potencia();
 
-            while (_OpAritm[IDTokens.OpPotencia.ToString()].TryGetValue(_Valor, out op)) {
-                Match(IDTokens.OpPotencia);
-                atrib = op(atrib, Potencia());
+            while (_ID == IDTokens.OpPotencia)
+            {
+                atrib = _OpAritm[_ID.ToString()][Match(_Valor)](atrib, Potencia());
             }
             return atrib;
         }
@@ -181,18 +174,18 @@ namespace Compilador.Analizadores.Sintaxis {
                     //    Match(IDTokens.OpTermino);
                     //    return double.Parse(signo + Potencia());
 
-                    case IDTokens.Numero:
+                    case IDTokens.NumeroInt:
                         int auxInt;
                         if(Int32.TryParse(_Valor, out auxInt)) 
                             atrib = new Atributo("", auxInt, Atributo.TypeDato.Int, "");
                         else
                             atrib = new Atributo("", float.Parse(_Valor), Atributo.TypeDato.Float, "");
 
-                        Match(IDTokens.Numero);
+                        Match(IDTokens.NumeroInt);
                         return atrib;
 
                     default:
-                        throw new InvalidDataException(String.Format("Se espera una expresion valida, en la Linea {0}, Columna {1}",
+                        throw new InvalidDataException(String.Format("Se espera una expresion aritmetica valida, en la Linea {0}, Columna {1}",
                             _Fila, _Columna));
                 }
             } catch (NullReferenceException) {

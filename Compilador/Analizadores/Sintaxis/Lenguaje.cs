@@ -62,7 +62,7 @@ namespace Compilador.Analizadores.Sintaxis {
             Match("using");
             do {
                 Match(IDTokens.Identificador);
-                if (!IsAndMatch(IDTokens.Punto))
+                if (!IsMatch(IDTokens.Punto))
                     break;
             } while (true);
             Match(IDTokens.FinSentencia);
@@ -73,7 +73,7 @@ namespace Compilador.Analizadores.Sintaxis {
             Match("NameSpace");
             do {
                 Match(IDTokens.Identificador);
-                if (!IsAndMatch(IDTokens.Punto))
+                if (!IsMatch(IDTokens.Punto))
                     break; ;
             } while (true);
             Match(IDTokens.InitBloque);
@@ -83,14 +83,14 @@ namespace Compilador.Analizadores.Sintaxis {
 
         private void Clase()
         {
-            IsAndMatch(IDTokens.Accesor);
+            IsMatch(IDTokens.Accesor);
             Match("Class");
             Match(IDTokens.Identificador);
             Match(IDTokens.InitBloque);
 
             do {
-                if (IsAndMatch(IDTokens.Accesor)) {
-                    if (IsAndMatch(IDTokens.Identificador)) {
+                if (IsMatch(IDTokens.Accesor)) {
+                    if (IsMatch(IDTokens.Identificador)) {
                         Metodo();
                         ResetBuffer();
                     } else {
@@ -135,10 +135,10 @@ namespace Compilador.Analizadores.Sintaxis {
                     Match(IDTokens.TipoDato);
                     _BuffNombre = _Valor;
                     Match(IDTokens.Identificador);
-                    if (IsAndMatch(IDTokens.OpAsignacion))
+                    if (IsMatch(IDTokens.OpAsignacion))
                         _BuffValor = Expresion();
                     NewAtrib(true);
-                    if (!IsAndMatch(IDTokens.Coma))
+                    if (!IsMatch(IDTokens.Coma))
                         break;
                 } while (true);
             }
@@ -154,8 +154,8 @@ namespace Compilador.Analizadores.Sintaxis {
             do {
                 _BuffNombre = _Valor;
                 Match(IDTokens.Identificador);
-                if (IsAndMatch(IDTokens.OpAsignacion)) {
-                    if (IsAndMatch("Console")) {
+                if (IsMatch(IDTokens.OpAsignacion)) {
+                    if (IsMatch("Console")) {
                         Match(IDTokens.Punto);
                         int auxInt;
                         string aux = ReadConsole(valido);
@@ -167,7 +167,7 @@ namespace Compilador.Analizadores.Sintaxis {
                         _BuffValor = Expresion();
                 }
 
-                if (IsAndMatch(IDTokens.Coma)) {
+                if (IsMatch(IDTokens.Coma)) {
                     NewAtrib(valido);
                     _BuffTipo = auxTipo;
                 } else break;
@@ -179,9 +179,9 @@ namespace Compilador.Analizadores.Sintaxis {
         private void Definicion(string auxTipo, bool valido)
         {
             do {
-                if (IsAndMatch(IDTokens.OpAsignacion))
+                if (IsMatch(IDTokens.OpAsignacion))
                     _BuffValor = Expresion();
-                if (IsAndMatch(IDTokens.Coma)) {
+                if (IsMatch(IDTokens.Coma)) {
                     NewAtrib(valido);
                     _BuffTipo = auxTipo;
                     _BuffNombre = _Valor;
@@ -196,12 +196,12 @@ namespace Compilador.Analizadores.Sintaxis {
         private void WriteConsole(bool valido)
         {
             bool isLine = true;
-            if (IsAndMatch("Write"))
+            if (IsMatch("Write"))
                 isLine = false;
             else
                 Match("WriteLine");
             Match(IDTokens.InitParametros);
-            if (_ID == IDTokens.Numero || _ID == IDTokens.Identificador) {
+            if (_ID == IDTokens.NumeroInt || _ID == IDTokens.Identificador) {
                 _OutPut.Add("" + Expresion().Valor + (isLine ? "\n" : ""));
             } else {
                 _OutPut.Add(_Valor.TrimStart('\"').TrimEnd('\"') + (isLine ? "\n" : ""));
@@ -231,7 +231,7 @@ namespace Compilador.Analizadores.Sintaxis {
 
         private void For(bool valido)
         {
-            if (IsAndMatch("for")) {
+            if (IsMatch("for")) {
                 int posCond;
                 Func<Atributo, Atributo, Atributo> incr = null;
                 _TblAtrib.NewAmbito();
@@ -280,12 +280,12 @@ namespace Compilador.Analizadores.Sintaxis {
 
         private void If(bool valido)
         {
-            if (IsAndMatch("if")) {
+            if (IsMatch("if")) {
                 bool validar = Condicion();
                 CuerpoOrSentencia(validar && valido);
                 do {
-                    if (IsAndMatch("else")) {
-                        if (IsAndMatch("if")) {
+                    if (IsMatch("else")) {
+                        if (IsMatch("if")) {
                             bool validar2 = Condicion();
                             validar2 = !validar ? (validar = validar2) : false;
                             CuerpoOrSentencia(validar2 && valido);
@@ -307,7 +307,7 @@ namespace Compilador.Analizadores.Sintaxis {
                 If(valido);
             } else if (_Valor == "for") {
                 For(valido);
-            } else if (IsAndMatch("Console")) {
+            } else if (IsMatch("Console")) {
                 Match(IDTokens.Punto);
                 if (_Valor == "Write" || _Valor == "WriteLine") {
                     WriteConsole(valido);
