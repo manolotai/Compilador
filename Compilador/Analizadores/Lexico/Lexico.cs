@@ -151,7 +151,7 @@ namespace Compilador.Analizadores.Lexico {
             Enlazar(i[1], _NodosLex[IDTokens.Error][2], 'e');
 
             //NUmeroFlt
-            NewNodo(IDTokens.NumeroInt, 2);
+            NewNodo(IDTokens.NumeroFlt, 2);
             i = _NodosLex[IDTokens.NumeroFlt];
             Enlazar(_NodosLex[IDTokens.Error][1], i[1], Numeros);
             Enlazar(i[1], i[1], Numeros);

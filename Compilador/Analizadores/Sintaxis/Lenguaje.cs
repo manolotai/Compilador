@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Compilador.Analizadores.Lexico;
+using Compilador.Analizadores.Semantica;
+using Compilador.Generador;
 
 namespace Compilador.Analizadores.Sintaxis {
     public class Lenguaje : LogicaAritmetica {
@@ -20,38 +22,38 @@ namespace Compilador.Analizadores.Sintaxis {
             NextTokenTrue();
         }
         
-        public void AnalisisSintactico()
+        public void Compilar(string outPath)
         {
-            _OutPut.Clear();
-            while (_Valor == "using") {
-                Referencia();
+            using (var streamWr = new StreamWriter(outPath)) {
+                _TextoASM = new Ensamblador(streamWr);
+
+                _OutPut.Clear();
+                while (_Valor == "using") {
+                    Referencia();
+                }
+                NameSpace();
             }
-            NameSpace();
         }
 
         private void NewAtrib(bool valido)
         {
             try {
                 if (valido) {
-                    if((Atributo.TypeDato)Enum.Parse(typeof(Atributo.TypeDato), _BuffTipo, true) >= _BuffValor.TipoDato) {
-                        var atrib = new Atributo(_BuffNombre, _BuffValor.Valor, 
+                    var atrib = new Atributo(_BuffNombre, _BuffValor,
                             _BuffTipo, _BuffAccesor);
-                        _TblAtrib.Add(atrib);
-                        _LogAtributos.Add(atrib);
-                        ResetBuffer();
-                    } else
-                        throw new InvalidDataException(String.Format("No se puede asignar {0} a {1}, en la Linea {2}, Columna {3}",
-                        _BuffValor.TipoDato, _BuffTipo, _Fila, _Columna));
+                    _TblAtrib.Add(atrib);
+                    _LogAtributos.Add(atrib);
+                    ResetBuffer();
                 }
-            } catch (FormatException) {
-                throw new FormatException(String.Format("{0} No tiene el formato correspondiente, en la Linea {1}, Columna {2}",
-                        _BuffValor, _Fila, _Columna));
+            } catch (InvalidDataException) {
+                throw new InvalidDataException(String.Format("No se puede asignar {0} a {1}, en la Linea {2}, Columna {3}",
+                        _BuffValor.TipoDato, _BuffTipo, _Fila, _Columna));
             } 
         }
 
         private void ResetBuffer()
         {
-            _BuffValor = new Atributo("", 0, Atributo.TypeDato.Char, "");
+            _BuffValor = new Atributo("", "", Atributo.TypeDato.Char, "");
             _BuffNombre = "";
             _BuffTipo = "Unknown";
             _BuffAccesor = "private";
@@ -160,9 +162,9 @@ namespace Compilador.Analizadores.Sintaxis {
                         int auxInt;
                         string aux = ReadConsole(valido);
                         if (Int32.TryParse(aux, out auxInt))
-                            _BuffValor = new Atributo("", auxInt, Atributo.TypeDato.Int, "");
+                            _BuffValor = new Atributo("", aux, Atributo.TypeDato.Int, "");
                         else
-                            _BuffValor = new Atributo("", float.Parse(aux), Atributo.TypeDato.Float, "");
+                            _BuffValor = new Atributo("", aux, Atributo.TypeDato.Float, "");
                     } else
                         _BuffValor = Expresion();
                 }
@@ -229,54 +231,54 @@ namespace Compilador.Analizadores.Sintaxis {
             return read;
         }
 
-        private void For(bool valido)
-        {
-            if (IsMatch("for")) {
-                int posCond;
-                Func<Atributo, Atributo, Atributo> incr = null;
-                _TblAtrib.NewAmbito();
+        //private void For(bool valido)
+        //{
+        //    if (IsMatch("for")) {
+        //        int posCond;
+        //        Func<Atributo, Atributo, Atributo> incr = null;
+        //        _TblAtrib.NewAmbito();
 
-                Match(IDTokens.InitParametros);
-                Declaracion(valido);
-                posCond = _ActPosicion;
-                Match(IDTokens.FinSentencia);
+        //        Match(IDTokens.InitParametros);
+        //        Declaracion(valido);
+        //        posCond = _ActPosicion;
+        //        Match(IDTokens.FinSentencia);
 
-                bool ciclo = Logica();
-                Match(IDTokens.FinSentencia);
-                string vIncr = _Valor;
-                Match(IDTokens.Identificador);
-                incr = Incremento(vIncr, true);
-                Match(IDTokens.FinParametros);
+        //        bool ciclo = Logica();
+        //        Match(IDTokens.FinSentencia);
+        //        string vIncr = _Valor;
+        //        Match(IDTokens.Identificador);
+        //        incr = Incremento(vIncr, true);
+        //        Match(IDTokens.FinParametros);
 
-                do {
-                    CuerpoOrSentencia(ciclo && valido);
+        //        do {
+        //            CuerpoOrSentencia(ciclo && valido);
 
-                    if (!_IsRepeat) {
-                        _IsRepeat = true;
-                    }
+        //            if (!_IsRepeat) {
+        //                _IsRepeat = true;
+        //            }
 
-                    if (ciclo) {
-                        _Texto.DiscardBufferedData();
-                        _Texto.BaseStream.Position = posCond;
+        //            if (ciclo) {
+        //                _Texto.DiscardBufferedData();
+        //                _Texto.BaseStream.Position = posCond;
 
-                        NextTokenTrue();
-                        _TblAtrib[vIncr].Valor = incr(_TblAtrib[vIncr], null).Valor;
-                        ciclo = Logica();
-                        Match(IDTokens.FinSentencia);
-                        Match(IDTokens.Identificador);
-                        Incremento(vIncr, true);
-                        Match(IDTokens.FinParametros);
-                    }
+        //                NextTokenTrue();
+        //                _TblAtrib[vIncr].Valor = incr(_TblAtrib[vIncr], null).Valor;
+        //                ciclo = Logica();
+        //                Match(IDTokens.FinSentencia);
+        //                Match(IDTokens.Identificador);
+        //                Incremento(vIncr, true);
+        //                Match(IDTokens.FinParametros);
+        //            }
                     
-                } while (ciclo);
-                _Texto.DiscardBufferedData();
-                _Texto.BaseStream.Position = _PenPosicion;
-                NextTokenTrue();
-                _IsRepeat = false;
-                _TblAtrib.DelAmbito();
+        //        } while (ciclo);
+        //        _Texto.DiscardBufferedData();
+        //        _Texto.BaseStream.Position = _PenPosicion;
+        //        NextTokenTrue();
+        //        _IsRepeat = false;
+        //        _TblAtrib.DelAmbito();
 
-            }
-        }
+        //    }
+        //}
 
         private void If(bool valido)
         {
@@ -306,7 +308,7 @@ namespace Compilador.Analizadores.Sintaxis {
             } else if (_Valor == "if") {
                 If(valido);
             } else if (_Valor == "for") {
-                For(valido);
+                //For(valido);
             } else if (IsMatch("Console")) {
                 Match(IDTokens.Punto);
                 if (_Valor == "Write" || _Valor == "WriteLine") {

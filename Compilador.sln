@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compilador", "Compilador\Compilador.csproj", "{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regresion", "..\Regresion\Regresion\Regresion.csproj", "{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +23,19 @@ Global
 		{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}.Release|x86.ActiveCfg = Release|Any CPU
 		{2AAFCE1C-375F-49E8-A85D-21E920E2BF8B}.Release|x86.Build.0 = Release|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Debug|x86.Build.0 = Debug|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Release|x86.ActiveCfg = Release|Any CPU
+		{B9D5FD7B-E9E9-4AB1-A777-58096D7ECB44}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50AB14A2-8638-45CD-A22F-DE41FAA8193F}
 	EndGlobalSection
 EndGlobal

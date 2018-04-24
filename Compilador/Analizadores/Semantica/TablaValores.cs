@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Compilador.Analizadores.Sintaxis {
+namespace Compilador.Analizadores.Semantica {
     public class TablaAtributos {
 
         private TablaAtributos _NextAmbito;

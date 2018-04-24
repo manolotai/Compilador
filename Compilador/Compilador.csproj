@@ -53,15 +53,16 @@
   <ItemGroup>
     <Compile Include="Analizadores\Sintaxis\Lenguaje.cs" />
     <Compile Include="Analizadores\Sintaxis\LogicaAritmetica.cs" />
-    <Compile Include="Analizadores\Sintaxis\Atributo.cs" />
+    <Compile Include="Analizadores\Semantica\Atributo.cs" />
     <Compile Include="Analizadores\Sintaxis\Sintaxis.cs" />
-    <Compile Include="Analizadores\Sintaxis\TablaValores.cs" />
+    <Compile Include="Analizadores\Semantica\TablaValores.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Generador\Ensamblador.cs" />
     <Compile Include="Grafo\Grafo.cs" />
     <Compile Include="Grafo\Nodo.cs" />
     <Compile Include="Analizadores\Lexico\Lexico.cs" />

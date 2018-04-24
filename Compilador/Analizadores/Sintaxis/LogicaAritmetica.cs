@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Compilador.Analizadores.Semantica;
 
 namespace Compilador.Analizadores.Sintaxis {
     public class LogicaAritmetica : Sintaxis {
@@ -47,11 +48,6 @@ namespace Compilador.Analizadores.Sintaxis {
                     { "*=", (x, y) => x * y },
                     { "/=", (x, y) => x / y },
                 } },
-                { "Cast", new Dictionary<string, Func<Atributo, Atributo, Atributo>>() {
-                    { "char", (x, y) => { var p = (x - x % 1) % 256; p.TipoDato = Atributo.TypeDato.Char; return p; } },
-                    { "int", (x, y) => { var p = (x - x % 1) % 655366; p.TipoDato = Atributo.TypeDato.Int; return p; } },
-                    { "float", (x, y) => { var p = x % 4294967296; p.TipoDato = Atributo.TypeDato.Float; return p; } }
-                } }
             };
         }
 
@@ -81,7 +77,7 @@ namespace Compilador.Analizadores.Sintaxis {
                         throw new InvalidDataException(String.Format("Se espera una expresion booleana valida, en la Linea {0}, Columna {1}",
                             _Fila, _Columna));
                     Match(IDTokens.OpComparacion);
-                    return compara(atrib.Valor, Expresion().Valor);
+                    return compara((double)atrib.Valor, (double)Expresion().Valor);
 
                 case IDTokens.Booleano:
                     if (IsMatch("true"))
@@ -155,7 +151,7 @@ namespace Compilador.Analizadores.Sintaxis {
                             var tipo = _Valor;
                             Match(_ID);
                             Match(IDTokens.FinParametros);
-                            atrib = _OpAritm["Cast"][tipo](Potencia(), null);
+                            atrib = Potencia().Cast(tipo);
 
                         } else {
                             atrib = Expresion();
@@ -175,18 +171,27 @@ namespace Compilador.Analizadores.Sintaxis {
                     //    return double.Parse(signo + Potencia());
 
                     case IDTokens.NumeroInt:
-                        int auxInt;
-                        if(Int32.TryParse(_Valor, out auxInt)) 
-                            atrib = new Atributo("", auxInt, Atributo.TypeDato.Int, "");
-                        else
-                            atrib = new Atributo("", float.Parse(_Valor), Atributo.TypeDato.Float, "");
+                    case IDTokens.NumeroFlt: //provisional
+                        return new Atributo("", _Valor, Match(_ID), "");
+                        //int auxInt;
+                        //if(Int32.TryParse(_Valor, out auxInt)) 
+                        //    atrib = new Atributo("", auxInt, Atributo.TypeDato.Int, "");
+                        //else
+                        //    atrib = new Atributo("", float.Parse(_Valor), Atributo.TypeDato.Float, "");
 
-                        Match(IDTokens.NumeroInt);
-                        return atrib;
+                        //IsMatch(IDTokens.NumeroInt);
+                        //IsMatch(IDTokens.NumeroFlt);
+                        //return atrib;
 
                     default:
-                        throw new InvalidDataException(String.Format("Se espera una expresion aritmetica valida, en la Linea {0}, Columna {1}",
-                            _Fila, _Columna));
+                        //if (IsMatch("Console"))
+                        //{
+                        //    Match(IDTokens.Punto);
+
+                        //} else
+                            throw new InvalidDataException(String.Format("Se espera una expresion aritmetica valida, en la Linea {0}, Columna {1}",
+                                _Fila, _Columna));
+                        //break;
                 }
             } catch (NullReferenceException) {
                 throw new NullReferenceException(String.Format("No se encontro la referencia en la Linea {0}, Columna {1}",

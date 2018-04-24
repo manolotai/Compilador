@@ -22,6 +22,8 @@ namespace Compilador {
         public __FrmMain()
         {
             InitializeComponent();
+            
+
             _InitPath = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
             _PathProyect = _InitPath;
             var listFiles = new DirectoryInfo(_PathProyect).GetFiles("Text.cs");
@@ -65,7 +67,7 @@ namespace Compilador {
                 try {
 
                     Lenguaje test = new Lenguaje(readStrm);
-                    test.AnalisisSintactico();
+                    test.Compilar();
 
                     foreach (var item in test.OutPut) {
                         __TxtRConsola.Text += item;

@@ -7,6 +7,8 @@ using System.IO;
 using Compilador; //no es lo mejor
 using Compilador.Grafo;
 using Compilador.Analizadores.Lexico;
+using Compilador.Analizadores.Semantica;
+using Compilador.Generador;
 
 namespace Compilador.Analizadores.Sintaxis {
     public class Sintaxis : Lexico.Lexico {
@@ -17,6 +19,7 @@ namespace Compilador.Analizadores.Sintaxis {
         protected List<Token> _LogTokens;
         protected List<Atributo> _LogAtributos;
 
+        protected Ensamblador _TextoASM;
         protected TablaAtributos _TblAtrib;
         protected Dictionary<string, IDTokens> _PReservadas;
 
@@ -30,7 +33,7 @@ namespace Compilador.Analizadores.Sintaxis {
 
             PReservadas(typeof(Booleanos), IDTokens.Booleano);
             PReservadas(typeof(Atributo.Accesor), IDTokens.Accesor);
-            PReservadas(typeof(Atributo.TypeDato), IDTokens.TipoDato);
+            PReservadas(typeof(Atributo.TypeReturn), IDTokens.TipoDato);
         }
 
         private void PReservadas(Type infoEnum, IDTokens asignToken)
