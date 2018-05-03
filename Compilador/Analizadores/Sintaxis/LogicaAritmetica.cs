@@ -15,48 +15,39 @@ namespace Compilador.Analizadores.Sintaxis {
         public LogicaAritmetica(StreamReader texto) : base(texto)
         {
             _OpLogico = new Dictionary<string, Func<bool, bool, bool>>() {
-                { "||", (x, y) => x || y },
-                { "&&", (x, y) => x && y }
+                { "||", (x, y) => { _ASM.AritLog("||"); return x || y; } },
+                { "&&", (x, y) => { _ASM.AritLog("&&"); return x && y; } }
             };
             _OpComparacion = new Dictionary<string, Func<double, double, bool>>() {
-                { "<", (x, y) => x < y },
-                { ">", (x, y) => x > y },
-                { "==", (x, y) => x == y },
-                { "<=", (x, y) => x <= y },
-                { ">=", (x, y) => x >= y },
-                { "!=", (x, y) => x != y }
+                { "<", (x, y) => { _ASM.Comp("<"); return x < y; } },
+                { ">", (x, y) => { _ASM.Comp(">"); return x > y; } },
+                { "==", (x, y) => { _ASM.Comp("=="); return x == y; } },
+                { "<=", (x, y) => { _ASM.Comp("<="); return x <= y; } },
+                { ">=", (x, y) => { _ASM.Comp(">="); return x >= y; } },
+                { "!=", (x, y) => { _ASM.Comp("!="); return x != y; } }
             };
             _OpAritm = new Dictionary<string, Dictionary<string, Func<Atributo, Atributo, Atributo>>>() {
                 { IDTokens.OpTermino.ToString(), new Dictionary<string, Func<Atributo, Atributo, Atributo>>() {
-                    { "+", (x, y) => x + y },
-                    { "-", (x, y) => x - y }
+                    { "+", (x, y) => { _ASM.AritLog("+"); return x + y; } },
+                    { "-", (x, y) => { _ASM.AritLog("-"); return x - y; } }
                 } },
                 { IDTokens.OpFactor.ToString(), new Dictionary<string, Func<Atributo, Atributo, Atributo>>() {
-                    { "*", (x, y) => x * y },
-                    { "/", (x, y) => x / y },
-                    { "%", (x, y) => x % y }
+                    { "*", (x, y) => { _ASM.AritLog("*"); return x * y; } },
+                    { "/", (x, y) => { _ASM.AritLog("/"); return x / y; } },
+                    { "%", (x, y) => { _ASM.AritLog("%"); return x % y; } }
                 } },
                 { IDTokens.OpPotencia.ToString(), new Dictionary<string, Func<Atributo, Atributo, Atributo>>() {
                     //{ "^", (x, y) => Math.Pow(x, y) },
                     //{ "!^", (x, y) => Math.Pow(x, 1 / y) }
-                } },
-                { IDTokens.OpIncremento.ToString(), new Dictionary<string, Func<Atributo, Atributo, Atributo>>() {
-                    { "++", (x, y) => { return (x + 1); } },
-                    { "--", (x, y) => x - 1 },
-                    { "+=", (x, y) => x + y },
-                    { "-=", (x, y) => x - y },
-                    { "*=", (x, y) => x * y },
-                    { "/=", (x, y) => x / y },
-                } },
+                } }
             };
         }
 
         //Logica
         protected bool Logica()
         {
-            Func<bool, bool, bool> logica;
             bool booleano = Comparacion();
-            if (_OpLogico.TryGetValue(_Valor, out logica)) {
+            if (_OpLogico.TryGetValue(_Valor, out var logica)) {
                 Match(IDTokens.OpLogico);
                 booleano = logica(booleano, Logica());
             }
@@ -70,31 +61,42 @@ namespace Compilador.Analizadores.Sintaxis {
                     return Condicion();
 
                 case IDTokens.Identificador:
-                case IDTokens.NumeroInt: //añadir + y - para negativos //resolver distincion () para logica y Expresion()
+                case IDTokens.NumeroFlt:
+                case IDTokens.NumeroInt: //añadir + y - para negativos
                     Atributo atrib = Expresion();
-                    Func<double, double, bool> compara;
-                    if (!_OpComparacion.TryGetValue(_Valor, out compara))
+                    if (!_OpComparacion.TryGetValue(_Valor, out var compara))
                         throw new InvalidDataException(String.Format("Se espera una expresion booleana valida, en la Linea {0}, Columna {1}",
                             _Fila, _Columna));
                     Match(IDTokens.OpComparacion);
                     return compara((double)atrib.Valor, (double)Expresion().Valor);
 
                 case IDTokens.Booleano:
-                    if (IsMatch("true"))
+                    if (IsMatch("true")) {
+                        _ASM.WR("push 1");
                         return true;
+                    }
                     else {
                         Match("false");
+                        _ASM.WR("push 0");
                         return false;
                     }
                 default:
                     if (IsMatch("!")) {
+                        bool booleano;
                         if (_ID == IDTokens.InitParametros)
-                            return !Condicion();
+                        {
+                            booleano = !Condicion();
+                            _ASM.Not();
+                        }
                         else if(_ID == IDTokens.Booleano)
-                            return !Comparacion();
+                        {
+                            booleano = !Comparacion();
+                            _ASM.Not();
+                        }
                         else
                             throw new InvalidDataException(String.Format("El operador ! no se puede aplicar a {0}, en la Linea {1}, Columna {2}",
                             _ID, _Fila, _Columna));
+                        return booleano;
                     }
                     else
                         throw new InvalidDataException(String.Format("Se espera una expresion booleana valida, en la Linea {0}, Columna {1}",
@@ -115,7 +117,7 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             Atributo atrib = Termino();
 
-            if (_ID == IDTokens.OpTermino)
+            if (_ID == IDTokens.OpTermino) 
                 atrib = _OpAritm[_ID.ToString()][Match(_Valor)](atrib, Expresion());
             return atrib;
         }
@@ -124,23 +126,12 @@ namespace Compilador.Analizadores.Sintaxis {
         {
             Atributo atrib = Factor();
 
-            if(_ID == IDTokens.OpFactor)
+            if(_ID == IDTokens.OpFactor) 
                 atrib = _OpAritm[_ID.ToString()][Match(_Valor)](atrib, Termino());
             return atrib;
         }
 
         protected Atributo Factor()
-        {
-            Atributo atrib = Potencia();
-
-            while (_ID == IDTokens.OpPotencia)
-            {
-                atrib = _OpAritm[_ID.ToString()][Match(_Valor)](atrib, Potencia());
-            }
-            return atrib;
-        }
-
-        protected Atributo Potencia()
         {
             try {
                 Atributo atrib;
@@ -151,7 +142,7 @@ namespace Compilador.Analizadores.Sintaxis {
                             var tipo = _Valor;
                             Match(_ID);
                             Match(IDTokens.FinParametros);
-                            atrib = Potencia().Cast(tipo);
+                            atrib = Factor().Cast(tipo);
 
                         } else {
                             atrib = Expresion();
@@ -163,6 +154,7 @@ namespace Compilador.Analizadores.Sintaxis {
                     case IDTokens.Identificador:
                         atrib = _TblAtrib[_Valor];
                         Match(IDTokens.Identificador);
+                        _ASM.WR($"push {atrib.Nombre}");
                         return atrib;
 
                     //case IDTokens.OpTermino:
@@ -172,31 +164,28 @@ namespace Compilador.Analizadores.Sintaxis {
 
                     case IDTokens.NumeroInt:
                     case IDTokens.NumeroFlt: //provisional
+                        _ASM.WR($"push {_Valor}");
                         return new Atributo("", _Valor, Match(_ID), "");
-                        //int auxInt;
-                        //if(Int32.TryParse(_Valor, out auxInt)) 
-                        //    atrib = new Atributo("", auxInt, Atributo.TypeDato.Int, "");
-                        //else
-                        //    atrib = new Atributo("", float.Parse(_Valor), Atributo.TypeDato.Float, "");
-
-                        //IsMatch(IDTokens.NumeroInt);
-                        //IsMatch(IDTokens.NumeroFlt);
-                        //return atrib;
 
                     default:
-                        //if (IsMatch("Console"))
-                        //{
-                        //    Match(IDTokens.Punto);
-
-                        //} else
-                            throw new InvalidDataException(String.Format("Se espera una expresion aritmetica valida, en la Linea {0}, Columna {1}",
-                                _Fila, _Columna));
-                        //break;
+                        throw new InvalidDataException(String.Format("Se espera una expresion aritmetica valida, en la Linea {0}, Columna {1}",
+                            _Fila, _Columna));
                 }
             } catch (NullReferenceException) {
                 throw new NullReferenceException(String.Format("No se encontro la referencia en la Linea {0}, Columna {1}",
                             _Fila, _Columna));
             }
         }
+
+        //protected Atributo Factor()
+        //{
+        //    Atributo atrib = Potencia();
+
+        //    while (_ID == IDTokens.OpPotencia)
+        //    {
+        //        atrib = _OpAritm[_ID.ToString()][Match(_Valor)](atrib, Potencia());
+        //    }
+        //    return atrib;
+        //}
     }
 }

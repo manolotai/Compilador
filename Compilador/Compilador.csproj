@@ -51,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analizadores\Sintaxis\EstructurasControl.cs" />
+    <Compile Include="Analizadores\Sintaxis\Instrucciones.cs" />
     <Compile Include="Analizadores\Sintaxis\Lenguaje.cs" />
     <Compile Include="Analizadores\Sintaxis\LogicaAritmetica.cs" />
     <Compile Include="Analizadores\Semantica\Atributo.cs" />
@@ -94,6 +96,8 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="ASM.asm" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -67,7 +67,7 @@ namespace Compilador {
                 try {
 
                     Lenguaje test = new Lenguaje(readStrm);
-                    test.Compilar();
+                    test.Compilar(_InitPath + @"\ASM.asm");
 
                     foreach (var item in test.OutPut) {
                         __TxtRConsola.Text += item;
@@ -81,6 +81,12 @@ namespace Compilador {
                         _TablaAtributos.Rows.Add(atrib.Nombre, "" + atrib.Valor,
                             atrib.TipoDato, atrib.Acceso);
                     }
+
+                    using (var streamRd = new StreamReader(_InitPath + @"\ASM.asm"))
+                        __TxtRASM.Text = streamRd.ReadToEnd();
+                    
+
+                    
                 } catch (InvalidDataException exc) {
                     __TxtRConsola.Text = "!!! " + exc.Message + "\n";
                 } catch (NullReferenceException exc) {

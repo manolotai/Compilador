@@ -19,7 +19,9 @@ namespace Compilador.Analizadores.Sintaxis {
         protected List<Token> _LogTokens;
         protected List<Atributo> _LogAtributos;
 
-        protected Ensamblador _TextoASM;
+        protected int _LabelID;
+
+        protected Ensamblador _ASM;
         protected TablaAtributos _TblAtrib;
         protected Dictionary<string, IDTokens> _PReservadas;
 

@@ -12,5 +12,5 @@ C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\
 C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\UnityEngine.dll
 C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\MyBackPack.pdb
 C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Debug\UnityEngine.xml
-C:\Users\Manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.csproj.CoreCompileInputs.cache
-C:\Users\Manolo\documents\visual studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.csproj.CopyComplete
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.csproj.CoreCompileInputs.cache
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\obj\Debug\Compilador.csproj.CopyComplete

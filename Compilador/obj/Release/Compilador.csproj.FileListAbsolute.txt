@@ -1,0 +1,4 @@
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\bin\Release\Compilador.exe.config
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\obj\Release\Compilador.__FrmMain.resources
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\obj\Release\Compilador.Properties.Resources.resources
+C:\Users\Manolo\Documents\Visual Studio 2017\Projects\Compilador\Compilador\obj\Release\Compilador.csproj.GenerateResource.Cache

@@ -108,7 +108,7 @@ namespace Compilador.Analizadores.Semantica {
                     atrib.TipoDato = TypeDato.Char;
                     break;
                 case TypeNum.Int:
-                    atrib = (this - this % 1) % 655366;
+                    atrib = (this - this % 1) % 65536;
                     atrib.TipoDato = TypeDato.Int;
                     break;
                 case TypeNum.Float:

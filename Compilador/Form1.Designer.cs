@@ -34,6 +34,8 @@
             this.@__PanelSP1_2 = new System.Windows.Forms.SplitContainer();
             this.@__TxtRConsola = new System.Windows.Forms.RichTextBox();
             this.@__PanelTab1 = new System.Windows.Forms.TabControl();
+            this.@__TabPage3 = new System.Windows.Forms.TabPage();
+            this.@__TxtRASM = new System.Windows.Forms.RichTextBox();
             this.@__TabPage1 = new System.Windows.Forms.TabPage();
             this.@__DataGVTokens = new System.Windows.Forms.DataGridView();
             this.@__TabPage2 = new System.Windows.Forms.TabPage();
@@ -52,6 +54,7 @@
             this.@__PanelSP1_2.Panel2.SuspendLayout();
             this.@__PanelSP1_2.SuspendLayout();
             this.@__PanelTab1.SuspendLayout();
+            this.@__TabPage3.SuspendLayout();
             this.@__TabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.@__DataGVTokens)).BeginInit();
             this.@__TabPage2.SuspendLayout();
@@ -167,14 +170,38 @@
             // 
             // __PanelTab1
             // 
-            this.@__PanelTab1.Controls.Add(this.@__TabPage1);
+            this.@__PanelTab1.Controls.Add(this.@__TabPage3);
             this.@__PanelTab1.Controls.Add(this.@__TabPage2);
+            this.@__PanelTab1.Controls.Add(this.@__TabPage1);
             this.@__PanelTab1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.@__PanelTab1.Location = new System.Drawing.Point(0, 0);
             this.@__PanelTab1.Name = "__PanelTab1";
             this.@__PanelTab1.SelectedIndex = 0;
             this.@__PanelTab1.Size = new System.Drawing.Size(391, 169);
             this.@__PanelTab1.TabIndex = 0;
+            // 
+            // __TabPage3
+            // 
+            this.@__TabPage3.Controls.Add(this.@__TxtRASM);
+            this.@__TabPage3.Location = new System.Drawing.Point(4, 22);
+            this.@__TabPage3.Name = "__TabPage3";
+            this.@__TabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.@__TabPage3.Size = new System.Drawing.Size(383, 143);
+            this.@__TabPage3.TabIndex = 2;
+            this.@__TabPage3.Text = "ASM";
+            this.@__TabPage3.UseVisualStyleBackColor = true;
+            // 
+            // __TxtRASM
+            // 
+            this.@__TxtRASM.AcceptsTab = true;
+            this.@__TxtRASM.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.@__TxtRASM.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.@__TxtRASM.Location = new System.Drawing.Point(3, 3);
+            this.@__TxtRASM.Name = "__TxtRASM";
+            this.@__TxtRASM.ReadOnly = true;
+            this.@__TxtRASM.Size = new System.Drawing.Size(377, 137);
+            this.@__TxtRASM.TabIndex = 1;
+            this.@__TxtRASM.Text = "";
             // 
             // __TabPage1
             // 
@@ -254,6 +281,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.@__PanelSP1_2)).EndInit();
             this.@__PanelSP1_2.ResumeLayout(false);
             this.@__PanelTab1.ResumeLayout(false);
+            this.@__TabPage3.ResumeLayout(false);
             this.@__TabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.@__DataGVTokens)).EndInit();
             this.@__TabPage2.ResumeLayout(false);
@@ -277,6 +305,8 @@
         private System.Windows.Forms.DataGridView __DataGVAtributos;
         private System.Windows.Forms.RichTextBox __TxtRConsola;
         private System.Windows.Forms.Button __BtnChangeCs;
+        private System.Windows.Forms.TabPage __TabPage3;
+        private System.Windows.Forms.RichTextBox __TxtRASM;
     }
 }
 
