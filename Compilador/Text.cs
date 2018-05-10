@@ -4,7 +4,7 @@ using Jace;
 NameSpace Test.subPath{ //Prueba
 	public Class CTest{
 		public void Main(){
-			float t1 = 4;
+			float t1 = (1 + 1) + 2 * 4;
 			
 			for(/***/int i = 0; i < 5; i++){
 				t1 = i;
@@ -14,7 +14,7 @@ NameSpace Test.subPath{ //Prueba
 			if(false){
 				
 			} else if ( !false ){
-				int t2 = 4%3;
+				int t2 = (int) t1 % 3;
 				Console.WriteLine(t2);
 				Console.ReadLine();
 			} else 

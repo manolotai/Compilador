@@ -1,4 +1,4 @@
-;Fecha de compilacion: 03/05/2018 09:35:39 a. m.
+;Fecha de compilacion: 09/05/2018 04:39:53 p. m.
 ;Angel Emmanuel Ruiz Alcaraz
 .386
 .model flat, stdcall
@@ -37,7 +37,22 @@ mov ConsoleInHand, eax
 INVOKE GetStdHandle, STD_OUTPUT_HANDLE
 mov ConsoleOutHand, eax 
 
+push 1
+push 1
+pop ebx
+pop eax
+add eax, ebx
+push eax
+push 2
 push 4
+pop ebx
+pop eax
+mul ebx
+push eax
+pop ebx
+pop eax
+add eax, ebx
+push eax
 pop t1
 
 push 0
@@ -85,7 +100,7 @@ push 0
 pop eax
 cmp eax, 1
 jne If11
-push 4
+push t1
 push 3
 pop ebx
 pop eax
@@ -105,7 +120,7 @@ jmp IfFin1
 If11:
 INVOKE dwtoa, t1, ADDR OutBuff
 lea ebx, OutBuff
-INVOKE WriteConsoleA, ConsoleOutHand, ebx, 1, offset OutBWr, 0
+INVOKE WriteConsoleA, ConsoleOutHand, ebx, 2, offset OutBWr, 0
 lea ebx, NewL
 INVOKE WriteConsoleA, ConsoleOutHand, ebx, 2, offset OutBWr, 0
 IfFin1:
